@@ -12,6 +12,7 @@
     <PackageReference Include="CoffeeToolkit" Version="1.0.8" />
     <PackageReference Include="Dapper" Version="2.0.123" />
     <PackageReference Include="Google.Apis.YouTube.v3" Version="1.55.0.2449" />
+    <PackageReference Include="MegaApiClient" Version="1.10.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="6.0.0" />
     <PackageReference Include="Npgsql" Version="6.0.0" />

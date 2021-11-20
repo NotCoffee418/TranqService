@@ -20,6 +20,16 @@ public class Config : IConfig
         get => Get<string>("YoutubeApiKey");
     }
 
+    public string MegaUsername
+    {
+        get => Get<string>("MegaUsername");
+    }
+
+    public string MegaPassword
+    {
+        get => Get<string>("MegaPassword");
+    }
+
     public Dictionary<string, string> VideoPlaylists
     {
         get
@@ -58,6 +68,7 @@ public class Config : IConfig
     }
 
     private Dictionary<T, U> GetDictionary<T, U>(string name)
+        where T : notnull
     {
         var section = _appSettings.GetSection($"Config:{name}");
 

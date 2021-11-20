@@ -42,7 +42,7 @@ public class YoutubeSaveHelper : IYoutubeSaveHelper
     /// <param name="videoData"></param>
     /// <param name="outputDir"></param>
     /// <param name="outputFormat"></param>
-    /// <returns></returns>
+    /// <returns>success?</returns>
     public async Task DownloadVideoAsync(YoutubeVideoModel videoData, string outputPath, string outputFormat)
     {
         try
@@ -71,18 +71,19 @@ public class YoutubeSaveHelper : IYoutubeSaveHelper
             _logger.Information(
                 "YoutubeDownloaderService: Finished downloading {0} {1}",
                 videoData.VideoGuid, videoData.Name);
-
+            videoData.IsDownloaded = true;
         }
         catch (Exception ex)
         {
-            _logger.Error("YoutubeDownloaderService failed to download video: {0} {1}", 
+            // Log exception
+            _logger.Warning("YoutubeDownloaderService failed to download video: {0} {1}", 
                 videoData.VideoGuid, videoData.Name, ex);
 
             // Cleanup on fail
             if (File.Exists(outputPath))
                 File.Delete(outputPath);
 
-            throw;
+            videoData.IsDownloaded = false;
         }
     }
 }

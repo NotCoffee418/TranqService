@@ -21,7 +21,7 @@ global using Serilog;
 
 
 // Internal
-global using TranqService.Shared.Models.ApplicationModels;
+global using TranqService.Shared.Models.ApplicationModels.YoutubeDownloaderService;
 global using TranqService.Shared.ApiHandlers;
 global using TranqService.Shared.Data;
 global using TranqServices.Shared.ApiHandlers;
