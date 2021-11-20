@@ -1,4 +1,6 @@
-﻿namespace TranqService.Shared.ApiHandlers
+﻿using Google.Apis.YouTube.v3.Data;
+
+namespace TranqService.Shared.ApiHandlers
 {
     public class YoutubeApiHandler : IYoutubeApiHandler
     {
@@ -26,22 +28,37 @@
         /// Gets all items in a youtube playlist as YoutubeVideoModel
         /// </summary>
         /// <returns></returns>
-        public async Task<IEnumerable<YoutubeVideoModel>> GetAllPlaylistItemsAsync()
+        public async Task<List<YoutubeVideoModel>> GetAllPlaylistItemsAsync(string playlistId)
         {
             // Prepare request
             Repeatable<string> part = new Repeatable<string>(new string[] { "id", "snippet" });
             var request = _youTubeService.PlaylistItems.List(part);
-            request.PlaylistId = "PLosVD5wwGC2vJPYxoZlQKpvXMOTBKfzLY";
+            request.PlaylistId = playlistId;
+            request.MaxResults = 50;
 
-            // execute and return
-            var response = await request.ExecuteAsync();
-            return response.Items
-                .Select(x => new YoutubeVideoModel()
-                {
-                    VideoId = x.Id,
-                    Name = x.Snippet.Title,
-                    Uploader = x.Snippet.ChannelTitle
-                });
+            List<YoutubeVideoModel> result = new();
+
+            // Get all items in playlist
+            PlaylistItemListResponse? response = null;
+            do
+            {
+                // Define page token and make request
+                if (response != null)
+                    request.PageToken = response.NextPageToken;
+                response = await request.ExecuteAsync();
+
+                // Add to result
+                result.AddRange(response.Items
+                    .Select(x => new YoutubeVideoModel()
+                    {
+                        VideoGuid = x.Id,
+                        Name = x.Snippet.Title,
+                        Uploader = x.Snippet.ChannelTitle,
+                        PlaylistGuid = playlistId
+                    }));
+            } while (response.NextPageToken != null);
+
+            return result;
         }
     }
 }

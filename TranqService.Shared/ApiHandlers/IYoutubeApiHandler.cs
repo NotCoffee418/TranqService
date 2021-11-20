@@ -3,6 +3,6 @@ namespace TranqServices.Shared.ApiHandlers
 {
     public interface IYoutubeApiHandler
     {
-        Task<IEnumerable<YoutubeVideoModel>> GetAllPlaylistItemsAsync();
+        Task<List<YoutubeVideoModel>> GetAllPlaylistItemsAsync(string playlistId);
     }
 }
