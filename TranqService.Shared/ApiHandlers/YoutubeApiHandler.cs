@@ -1,13 +1,6 @@
-﻿using Google.Apis.Auth.OAuth2;
-using Google.Apis.Services;
-using Google.Apis.Util;
-using Google.Apis.Util.Store;
-using Google.Apis.YouTube.v3;
-using TranqServices.Shared.Data;
-
-namespace TranqServices.Shared.ApiHandlers
+﻿namespace TranqService.Shared.ApiHandlers
 {
-    public class YoutubeApiHandler
+    public class YoutubeApiHandler : IYoutubeApiHandler
     {
         IConfig _config;
 
@@ -19,7 +12,7 @@ namespace TranqServices.Shared.ApiHandlers
 
             Authenticate();
         }
-        
+
         private void Authenticate()
         {
             _youTubeService = new YouTubeService(new BaseClientService.Initializer()
@@ -33,7 +26,7 @@ namespace TranqServices.Shared.ApiHandlers
         /// Gets all items in a youtube playlist as YoutubeVideoModel
         /// </summary>
         /// <returns></returns>
-        public async Task<IEnumerable<YoutubeVideoModel>> GetAllPlaylistItems()
+        public async Task<IEnumerable<YoutubeVideoModel>> GetAllPlaylistItemsAsync()
         {
             // Prepare request
             Repeatable<string> part = new Repeatable<string>(new string[] { "id", "snippet" });

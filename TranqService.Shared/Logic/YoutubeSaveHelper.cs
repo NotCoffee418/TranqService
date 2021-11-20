@@ -1,4 +1,4 @@
-﻿namespace TranqServices.Shared.Logic;
+﻿namespace TranqService.Shared.Logic;
 public class YoutubeSaveHelper
 {
     public YoutubeSaveHelper()

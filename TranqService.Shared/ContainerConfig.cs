@@ -3,11 +3,10 @@ public static class ContainerConfig
 {
     public static void Configure(ContainerBuilder builder)
     {
-
-        
         // Bulk registrations
         builder.BulkRegister(
-        "TranqService.Sharted.ApiHandlers"  // Register Api handlers
+            "TranqService.Shared.ApiHandlers",  // Register Api handlers
+            "TranqService.Shared.Data"
         );
     }
 

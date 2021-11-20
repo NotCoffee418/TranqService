@@ -1,4 +1,4 @@
-﻿namespace TranqServices.Shared.Data
+﻿namespace TranqService.Shared.Data
 {
     public interface IConfig
     {
