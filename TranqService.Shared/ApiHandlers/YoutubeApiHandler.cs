@@ -51,9 +51,9 @@ namespace TranqService.Shared.ApiHandlers
                 result.AddRange(response.Items
                     .Select(x => new YoutubeVideoModel()
                     {
-                        VideoGuid = x.Id,
+                        VideoGuid = x.Snippet.ResourceId.VideoId,
                         Name = x.Snippet.Title,
-                        Uploader = x.Snippet.ChannelTitle,
+                        Uploader = x.Snippet.VideoOwnerChannelTitle,
                         PlaylistGuid = playlistId
                     }));
             } while (response.NextPageToken != null);

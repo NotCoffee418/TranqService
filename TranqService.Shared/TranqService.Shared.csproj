@@ -16,6 +16,7 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="6.0.0" />
     <PackageReference Include="Npgsql" Version="6.0.0" />
     <PackageReference Include="Serilog" Version="2.10.0" />
+    <PackageReference Include="YoutubeExplode" Version="6.0.5" />
   </ItemGroup>
 
   <ItemGroup>
