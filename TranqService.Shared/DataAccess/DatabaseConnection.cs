@@ -1,8 +1,8 @@
 ﻿namespace TranqService.Shared.DataAccess
 {
-    public class DatabaseConnection
+    public class DatabaseConnection : IDatabaseConnection
     {
-        private const string connStr = "Server=127.0.0.1;Port=9003;Database=TranqService.Database;Userid=TranqService;Password=kXakVYj7WEZYQgfH;Include Error Detail=true";
+        private const string connStr = "Server=db;Port=5432;Database=TranqService.Database;Userid=TranqService;Password=kXakVYj7WEZYQgfH;Include Error Detail=true";
         private static bool IsUpgraded { get; set; } = false;
         private static bool UpgradeInProgress { get; set; } = false;
 
@@ -34,7 +34,7 @@
         {
             // Upgrade database
             var upgrader = new DatabaseUpgrader<NpgsqlConnection>(connection);
-            await upgrader.UpgradeAsyc(nameof(TranqService.Shared.Data.Migrations));
+            await upgrader.UpgradeAsyc();
         }
     }
 }

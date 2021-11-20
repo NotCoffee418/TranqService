@@ -4,10 +4,19 @@ public class v0001_IntializeDatabase : IMigration
     public int DbVersion => 1;
 
     public string MigrationSql => @"
-        CREATE TABLE processedyoutubevideos
+        CREATE TABLE youtube_processed_videos
         (
             id              serial          PRIMARY KEY,
-            videoid         varchar(32)     NOT NULL
+            videoguid         varchar(32)     NOT NULL,
+            playlistid      integer         NOT NULL,
+
+            UNIQUE(videoguid, playlistid)
+        );
+
+        CREATE TABLE youtube_playlists
+        (
+            id              serial          PRIMARY KEY,
+            playlistguid    varchar(64)     UNIQUE NOT NULL
         );
     ";
 }

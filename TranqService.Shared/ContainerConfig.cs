@@ -6,7 +6,9 @@ public static class ContainerConfig
         // Bulk registrations
         builder.BulkRegister(
             "TranqService.Shared.ApiHandlers",  // Register Api handlers
-            "TranqService.Shared.Data"
+            "TranqService.Shared.Data",
+            "TranqService.Shared.DataAccess",
+            "TranqService.Shared.Logic"
         );
     }
 

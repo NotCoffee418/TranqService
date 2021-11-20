@@ -6,3 +6,19 @@ services:
     build:
       context: .
       dockerfile: TranqService/Dockerfile
+
+  db:
+    container_name: TranqService.Database
+    image: postgres:alpine
+    environment:
+      POSTGRES_USER: "TranqService"
+      POSTGRES_PASSWORD: "kXakVYj7WEZYQgfH"
+      POSTGRES_DB: "TranqService.Database"
+    ports:
+      - "127.0.0.1:9007:5432" 
+    volumes:
+      - tranqservice_dbdata:/var/lib/postgresql/data
+    restart: always
+
+volumes:
+  tranqservice_dbdata:

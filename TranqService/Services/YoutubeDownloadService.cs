@@ -1,18 +1,16 @@
-using TranqServices.Shared.ApiHandlers;
-
 namespace TranqService.Services;
 public class YoutubeDownloadService : BackgroundService
 {
     private readonly ILogger<YoutubeDownloadService> _logger;
-    private readonly IYoutubeApiHandler _youtubeApiHandler;
+    private readonly IYoutubeSaveHelper _youtubeSaveHelper;
 
     public YoutubeDownloadService(
         ILogger<YoutubeDownloadService> logger,
-        IYoutubeApiHandler youtubeApiHandler
+        IYoutubeSaveHelper youtubeSaveHelper
         )
     {
         _logger = logger;
-        _youtubeApiHandler = youtubeApiHandler;
+        _youtubeSaveHelper = youtubeSaveHelper;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -21,7 +19,7 @@ public class YoutubeDownloadService : BackgroundService
         {
             _logger.LogInformation("YoutubeDownloadService: Checking for youtube downloads at: {time}", DateTimeOffset.Now);
 
-            var AAAAAAAA = await _youtubeApiHandler.GetAllPlaylistItemsAsync();
+            var AAAAAAAA = await _youtubeSaveHelper.GetUndownloadedVideosAsync("PLosVD5wwGC2vJPYxoZlQKpvXMOTBKfzLY");
 
             // Check every hour
             await Task.Delay(TimeSpan.FromHours(1), stoppingToken);
