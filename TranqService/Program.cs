@@ -1,5 +1,3 @@
-using TranqService;
-
 IHost host = Host.CreateDefaultBuilder(args)
     .ConfigureServices(services =>
     {

@@ -1,0 +1,8 @@
+version: '3.4'
+
+services:
+  tranqservice:
+    image: ${DOCKER_REGISTRY-}tranqservice
+    build:
+      context: .
+      dockerfile: TranqService/Dockerfile
