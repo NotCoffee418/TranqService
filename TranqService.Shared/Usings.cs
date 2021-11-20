@@ -16,6 +16,9 @@ global using Npgsql;
 global using Google.Apis.Services;
 global using Google.Apis.Util;
 global using Google.Apis.YouTube.v3;
+global using Microsoft.Extensions.Configuration;
+global using Serilog;
+
 
 // Internal
 global using TranqService.Shared.Models.ApplicationModels;
