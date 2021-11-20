@@ -22,7 +22,7 @@ public class YoutubeSaveHelper : IYoutubeSaveHelper
 
     public async Task<List<YoutubeVideoModel>> GetUndownloadedVideosAsync(string playlistId)
     {
-        // Get all playlist IDs
+        // Get all video IDs
         var allVideosInPlaylist = await _youtubeApiHandler.GetAllPlaylistItemsAsync(playlistId);
 
         // Get all previously downloaded videos

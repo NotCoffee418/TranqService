@@ -7,8 +7,9 @@ public class v0001_IntializeDatabase : IMigration
         CREATE TABLE youtube_processed_videos
         (
             id              serial          PRIMARY KEY,
-            videoguid         varchar(32)     NOT NULL,
+            videoguid       varchar(32)     NOT NULL,
             playlistid      integer         NOT NULL,
+            nodeid          varchar(16)     UNIQUE,
 
             UNIQUE(videoguid, playlistid)
         );

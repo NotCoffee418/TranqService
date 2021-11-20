@@ -1,21 +1,25 @@
 using CG.Web.MegaApiClient;
+using TranqService.Shared.DataAccess;
 
 namespace TranqService.Services;
 public class YoutubeDownloadService : BackgroundService
 {
     private readonly Serilog.ILogger _logger;
     private readonly IYoutubeSaveHelper _youtubeSaveHelper;
+    private readonly IYoutubeQueries _youtubeQueries;
     private readonly IConfig _config;
     private readonly IMegaApiHandler _megaApiHandler;
 
     public YoutubeDownloadService(
         Serilog.ILogger logger,
         IYoutubeSaveHelper youtubeSaveHelper,
+        IYoutubeQueries youtubeQueries,
         IMegaApiHandler megaApiHandler,
         IConfig config)
     {
         _logger = logger;
         _youtubeSaveHelper = youtubeSaveHelper;
+        _youtubeQueries = youtubeQueries;
         _config = config;
         _megaApiHandler = megaApiHandler;
     }
@@ -88,11 +92,13 @@ public class YoutubeDownloadService : BackgroundService
 
         // Parallel search for approperiate node directory
         // This is a slow operation
-        Task<INode> backgroundMegaPrep = PrepareMegaDirectory(outputDirectory, allVideosToDownload, outputFormat);
+        Task<INode>? backgroundMegaPrep = null;
+
+        if (queue.Count > 0)
+            backgroundMegaPrep = PrepareMegaDirectory(outputDirectory, allVideosToDownload, outputFormat);
 
         // List of downloaded temp files
         List<(YoutubeVideoModel, string)> downloadedList = new();
-
         try
         {
             // Run downloaders 5 at a time
@@ -119,39 +125,33 @@ public class YoutubeDownloadService : BackgroundService
                 await Task.WhenAll(runningTasks);
 
             // Wait for mega to find directory node
-            INode targetDirNode = await backgroundMegaPrep;
+            INode? targetDirNode = null;
+            if (backgroundMegaPrep != null)
+                targetDirNode = await backgroundMegaPrep;
 
             // Save files to mega, async, no parallel!
             foreach (var vidData in downloadedList)
             {
                 bool markAsComplete = true;
+                INode uploadedNode = null;
+
+                // Duplicate filename
                 if (vidData.Item1.IsDuplicate)
-                {
                     _logger.Warning("YoutubeDownloadService: Not downloading which already has a file with the same name. Marking as complete instead");
-                    continue;
-                }
+                // Failed to download for some reason
                 else if (!vidData.Item1.IsDownloaded)
                     markAsComplete = false; // happens when download failed
+                // Upload file to mega
                 else
-                {
-                    // Upload file to mega
-                    await _megaApiHandler.UploadFile(vidData.Item2, targetDirNode);
-                }
+                    uploadedNode = await _megaApiHandler.UploadFile(vidData.Item2, targetDirNode);
 
                 // Mark as downloaded in database
                 if (markAsComplete)
-                {
-                    _logger.Information("fake mark as complete {0}", vidData.Item1.GetFileName(outputFormat));
-                }
-                else
-                {
-
-                }
+                    await _youtubeQueries.MarkVideoAsDownloadedAsync(
+                        vidData.Item1.VideoGuid, 
+                        vidData.Item1.PlaylistGuid, 
+                        uploadedNode == null ? null : uploadedNode.Id);
             }
-
-
-
-#warning implement me or or files will download and delete
         }
         catch (Exception ex)
         {
@@ -164,7 +164,6 @@ public class YoutubeDownloadService : BackgroundService
                 if (File.Exists(path))
                     File.Delete(path);
         }
-        
     }
 
     /// <summary>

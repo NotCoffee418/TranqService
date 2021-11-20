@@ -32,6 +32,8 @@ public class YoutubeQueries : IYoutubeQueries
         // Attempt to find playlist
         int? result = await db.QueryFirstOrDefaultAsync<int>(
             "SELECT id FROM youtube_playlists WHERE playlistguid = @PlaylistGuid", input);
+        if (result != null)
+            return result.Value;
 
         // Insert and get value if doesnt exist yet
         result = await db.QueryFirstAsync<int>(
@@ -46,14 +48,15 @@ public class YoutubeQueries : IYoutubeQueries
     /// <param name="videoGuid"></param>
     /// <param name="playlistGuid"></param>
     /// <returns></returns>
-    public async Task MarkVideoAsDownloadedAsync(string videoGuid, string playlistGuid)
+    public async Task MarkVideoAsDownloadedAsync(string videoGuid, string playlistGuid, string? nodeId)
     {
         // Get playlist id
         int playlistId = await GetPlaylistIdAsync(playlistGuid);
 
         // Nark as downloaded
         using var db = await _databaseConnection.GetConnectionAsync();
-        await db.ExecuteAsync("INSERT INTO youtube_processed_videos (videoguid, playlistid) " +
-            "VALUES (@VideoGuid, @PlaylistId) ON CONFLICT DO NOTHING");
+        await db.ExecuteAsync("INSERT INTO youtube_processed_videos (videoguid, playlistid, nodeid) " +
+            "VALUES (@VideoGuid, @PlaylistId, @NodeId) ON CONFLICT DO NOTHING",
+            new { VideoGuid = videoGuid, PlaylistId = playlistId, NodeId = nodeId });
     }
 }

@@ -8,6 +8,6 @@ namespace TranqService.Shared.ApiHandlers
         Task<INode> FindDirectoryNode(string dirPath, List<INode> allNodes = null);
         Task<List<INode>> GetAllNodes();
         Task<List<INode>> ListFileNodes(INode parentDirectory, List<INode>? allNodes = null);
-        Task UploadFile(string localPath, INode targetDirectoryNode);
+        Task<INode> UploadFile(string localPath, INode targetDirectoryNode);
     }
 }

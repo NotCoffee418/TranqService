@@ -125,12 +125,13 @@ public class MegaApiHandler : IMegaApiHandler
     /// <param name="targetDirectoryNode"></param>
     /// <returns></returns>
     /// <exception cref="ArgumentException"></exception>
-    public async Task UploadFile(string localPath, INode targetDirectoryNode)
+    public async Task<INode> UploadFile(string localPath, INode targetDirectoryNode)
     {
         // Validation
         if (targetDirectoryNode.Type == NodeType.File)
             throw new ArgumentException("MegaApiHandler: Provided node type for targetDirectoryNode was not directory.");
 
-        await client.UploadFileAsync(localPath, targetDirectoryNode);
+        _logger.Information("Uploading to Mega: {0}", Path.GetFileName(localPath));
+        return await client.UploadFileAsync(localPath, targetDirectoryNode);
     }
 }
