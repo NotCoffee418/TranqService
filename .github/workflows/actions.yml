@@ -18,13 +18,13 @@ jobs:
         dotnet-version: 6.0.x
         
     - name: Restore dependencies
-      run: dotnet restore
+      run: dotnet restore TranqService.sln
       
     - name: Build
-      run: dotnet build --no-restore
+      run: dotnet build --no-restore TranqService.sln
       
     - name: Test
-      run: dotnet test --no-build --verbosity normal
+      run: dotnet test --no-build --verbosity normal TranqService.sln
       
     - name: Deploy
       uses: appleboy/ssh-action@master
