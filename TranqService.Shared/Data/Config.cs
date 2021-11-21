@@ -1,6 +1,4 @@
-﻿
-
-namespace TranqService.Shared.Data;
+﻿namespace TranqService.Shared.Data;
 public class Config : IConfig
 {
     private IConfiguration _appSettings;
@@ -28,6 +26,16 @@ public class Config : IConfig
     public string MegaPassword
     {
         get => Get<string>("MegaPassword");
+    }
+
+    public ulong DiscordWebhookId
+    {
+        get => Get<ulong>("DiscordWebhookId");
+    }
+
+    public string DiscordWebhookSecret
+    {
+        get => Get<string>("DiscordWebhookSecret");
     }
 
     public Dictionary<string, string> VideoPlaylists
