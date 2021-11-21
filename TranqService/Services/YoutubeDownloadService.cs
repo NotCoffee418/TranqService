@@ -85,17 +85,37 @@ public class YoutubeDownloadService : BackgroundService
         string outputFormat,
         CancellationToken stoppingToken)
     {
-        // Prepare queue
-        Queue<YoutubeVideoModel> queue = new();
-        foreach (YoutubeVideoModel videoData in allVideosToDownload) 
-            queue.Enqueue(videoData);
-
         // Parallel search for approperiate node directory
         // This is a slow operation
+        INode? targetDirNode = null;
         Task<INode>? backgroundMegaPrep = null;
 
-        if (queue.Count > 0)
+        if (allVideosToDownload.Count > 0)
             backgroundMegaPrep = PrepareMegaDirectory(outputDirectory, allVideosToDownload, outputFormat);
+
+        // If first time running after DB reset, wait for mega so we can avoid downloading a whole playlist when we already have it in mega
+        if (await _youtubeQueries.CountDownloadedVideosAsync() < 10)
+        {
+            // Wait for mega
+            _logger.Warning("YoutubeThis is a fresh database. Waiting for mega to be explored before downloading.");
+            targetDirNode = await backgroundMegaPrep;
+
+            // Get all known filenames in this directory
+            var knownFiles = (await _megaApiHandler.ListFileNodes(targetDirNode))
+                .Select(x => x.Name)
+                .ToList();
+
+            // Filter out files we already have
+            allVideosToDownload = allVideosToDownload
+                .Where(x => !knownFiles.Contains(x.GetFileName(outputFormat)))
+                .ToList();
+        }
+        
+
+        // Prepare queue
+        Queue<YoutubeVideoModel> queue = new();
+        foreach (YoutubeVideoModel videoData in allVideosToDownload)
+            queue.Enqueue(videoData);
 
         // List of downloaded temp files
         List<(YoutubeVideoModel, string)> downloadedList = new();
@@ -125,8 +145,7 @@ public class YoutubeDownloadService : BackgroundService
                 await Task.WhenAll(runningTasks);
 
             // Wait for mega to find directory node
-            INode? targetDirNode = null;
-            if (backgroundMegaPrep != null)
+            if (backgroundMegaPrep != null && targetDirNode == null)
                 targetDirNode = await backgroundMegaPrep;
 
             // Save files to mega, async, no parallel!

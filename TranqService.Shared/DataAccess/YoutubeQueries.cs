@@ -59,4 +59,10 @@ public class YoutubeQueries : IYoutubeQueries
             "VALUES (@VideoGuid, @PlaylistId, @NodeId) ON CONFLICT DO NOTHING",
             new { VideoGuid = videoGuid, PlaylistId = playlistId, NodeId = nodeId });
     }
+
+    public async Task<int> CountDownloadedVideosAsync()
+    {
+        using var db = await _databaseConnection.GetConnectionAsync();
+        return await db.ExecuteScalarAsync<int>("SELECT COUNT(id) FROM youtube_processed_videos");
+    }
 }
