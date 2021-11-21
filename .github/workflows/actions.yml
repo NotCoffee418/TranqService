@@ -40,6 +40,6 @@ jobs:
             fi
             cd ~/TranqService
             git pull
-            docker-compose -f C:\Users\tranq\Documents\GitHub\TranqService\docker-compose.deploy.yml down
-            docker-compose -f C:\Users\tranq\Documents\GitHub\TranqService\docker-compose.deploy.yml up -d
+            docker-compose -f docker-compose.deploy.yml down
+            docker-compose -f docker-compose.deploy.yml up -d
             
