@@ -3,8 +3,26 @@ using Autofac.Extensions.DependencyInjection;
 using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.Discord;
+using System.Reflection;
 using TranqService.Shared;
 
+// Access config manually for DI building
+string appsettingsPath = "/app/appsettings.json";
+IConfiguration configuration = new ConfigurationBuilder()
+        .AddJsonFile(appsettingsPath)
+        .Build();
+ulong discordWebhookId = Convert.ToUInt64(configuration["Config:DiscordWebhookId"]);
+string discordWebhookSecret = configuration["Config:DiscordWebhookSecret"];
+
+// init logger
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+    .Enrich.FromLogContext()
+    .WriteTo.Console(LogEventLevel.Information)
+    .WriteTo.Discord(discordWebhookId, discordWebhookSecret, 
+        restrictedToMinimumLevel: LogEventLevel.Warning)
+    .CreateLogger();
 
 // Init host
 IHost host = Host.CreateDefaultBuilder(args)
@@ -16,18 +34,6 @@ IHost host = Host.CreateDefaultBuilder(args)
     .ConfigureContainer<ContainerBuilder>(ContainerConfig.Configure)
     .UseSerilog(Log.Logger)
     .Build();
-
-// Load config
-IConfig config = (IConfig)host.Services.GetRequiredService(typeof(IConfig));
-
-// init logger
-Log.Logger = new LoggerConfiguration()
-        .MinimumLevel.Information()
-        .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
-        .Enrich.FromLogContext()
-        .WriteTo.Console()
-        .WriteTo.Discord(config.DiscordWebhookId, config.DiscordWebhookSecret, restrictedToMinimumLevel: LogEventLevel.Warning)
-        .CreateLogger();
 
 // Notify of restart
 Log.Logger.Warning("Tranqservice (re)started.");
