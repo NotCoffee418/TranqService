@@ -6,6 +6,8 @@ services:
     build:
       context: .
       dockerfile: TranqService/Dockerfile
+    volumes:
+    - /home/tranqservice/appsettings.json:/app/appsettings.json
     depends_on:
     - db
 
