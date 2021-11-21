@@ -34,8 +34,12 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: 22
           script: | 
-            git clone https://github.com/NotCoffee418/TranqService.git            
+            if [ ! -d ~/TranqService ]
+            then
+                git clone https://github.com/NotCoffee418/TranqService.git    
+            fi
             cd ~/TranqService
+            git pull
             docker-compose -f C:\Users\tranq\Documents\GitHub\TranqService\docker-compose.deploy.yml down
             docker-compose -f C:\Users\tranq\Documents\GitHub\TranqService\docker-compose.deploy.yml up -d
             
