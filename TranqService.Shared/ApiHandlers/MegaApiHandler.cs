@@ -55,6 +55,10 @@ public class MegaApiHandler : IMegaApiHandler
             .Where(x => x.Type == NodeType.Root)
             .First();
 
+        // Define variable path parts
+        dirPath = dirPath
+            .Replace("{Year}", DateTime.UtcNow.Year.ToString());
+
         // Split inputpath into parts, ignore whitespace
         var requestDirParts = dirPath
             .Replace("\\", "/")
