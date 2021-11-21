@@ -30,13 +30,13 @@ public class YoutubeQueries : IYoutubeQueries
         var input = new { PlaylistGuid = playlistGuid };
 
         // Attempt to find playlist
-        int? result = await db.QueryFirstOrDefaultAsync<int>(
+        int? result = await db.ExecuteScalarAsync<int?>(
             "SELECT id FROM youtube_playlists WHERE playlistguid = @PlaylistGuid", input);
         if (result != null)
             return result.Value;
 
         // Insert and get value if doesnt exist yet
-        result = await db.QueryFirstAsync<int>(
+        result = await db.ExecuteScalarAsync<int>(
             "INSERT INTO youtube_playlists (playlistguid) VALUES (@PlaylistGuid) RETURNING id", input);
 
         return result.Value;

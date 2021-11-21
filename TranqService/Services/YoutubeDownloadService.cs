@@ -122,70 +122,79 @@ public class YoutubeDownloadService : BackgroundService
             // Continue downloading the files we dont have yet
             var alreadyDownloadedVideoGuids = alreadyDownloadedFiles.Select(x => x.VideoGuid);
             allVideosToDownload = allVideosToDownload
-                .Where(x => alreadyDownloadedVideoGuids.Contains(x.VideoGuid))
+                .Where(x => !alreadyDownloadedVideoGuids.Contains(x.VideoGuid))
                 .ToList();
-        }
-        
+        }    
 
         // Prepare queue
         Queue<YoutubeVideoModel> queue = new();
         foreach (YoutubeVideoModel videoData in allVideosToDownload)
             queue.Enqueue(videoData);
 
-        // List of downloaded temp files
-        List<(YoutubeVideoModel, string)> downloadedList = new();
+        List<string> tempFiles = new List<string>();
         try
         {
             // Run downloaders 5 at a time
-            List<Task> runningTasks = new List<Task>();
+            List<Task> runningDownloaders = new List<Task>();
+            List<Task> runningUploaders = new List<Task>();
             while (!stoppingToken.IsCancellationRequested && queue.Count > 0)
             {
                 // Hold while max allowed parallel tasks is running
-                while (runningTasks.Where(x => !x.IsCompleted).Count() >= 5)
+                while (runningDownloaders.Where(x => !x.IsCompleted).Count() >= 5)
                     await Task.Delay(200);
 
                 // Store download location for video
                 YoutubeVideoModel videoData = queue.Dequeue();
                 string tmpPath = Path.Join(Path.GetTempPath(), videoData.GetFileName(outputFormat));
-                downloadedList.Add((videoData, tmpPath));
+                tempFiles.Add(tmpPath);
 
                 // Run a fresh task
-                Task task = Task.Run(async () => await _youtubeSaveHelper.DownloadVideoAsync(
-                    videoData, tmpPath, outputFormat));
-                runningTasks.Add(task);
+                Task dlTask = Task.Run(async () =>
+                {
+                    // Download the video
+                    await _youtubeSaveHelper.DownloadVideoAsync(
+                        videoData, tmpPath, outputFormat);
+
+                    // Await mega
+                    if (targetDirNode == null)
+                        targetDirNode = await backgroundMegaPrep;
+
+                    // Start uploader task
+                    runningUploaders.Add(Task.Run(async () =>
+                    {
+                        // Wait for mega to find directory node
+                        if (backgroundMegaPrep != null && targetDirNode == null)
+                            targetDirNode = await backgroundMegaPrep;
+
+                        bool markAsComplete = true;
+                        INode uploadedNode = null;
+
+                        // Duplicate filename
+                        if (videoData.IsDuplicate)
+                            _logger.Warning("YoutubeDownloadService: Not downloading which already has a file with the same name. Marking as complete instead");
+                        // Failed to download for some reason
+                        else if (!videoData.IsDownloaded)
+                            markAsComplete = false; // happens when download failed
+                                                    // Upload file to mega
+                        else
+                            uploadedNode = await _megaApiHandler.UploadFile(tmpPath, targetDirNode);
+
+                        // Mark as downloaded in database
+                        if (markAsComplete)
+                            await _youtubeQueries.MarkVideoAsDownloadedAsync(
+                                videoData.VideoGuid,
+                                videoData.PlaylistGuid,
+                                uploadedNode == null ? null : uploadedNode.Id);
+                    }));
+                });
+                runningDownloaders.Add(dlTask);
             }
 
-            // Wait for last 5 tasks to complete
+            // Wait for all tasks to complete
             if (!stoppingToken.IsCancellationRequested)
-                await Task.WhenAll(runningTasks);
-
-            // Wait for mega to find directory node
-            if (backgroundMegaPrep != null && targetDirNode == null)
-                targetDirNode = await backgroundMegaPrep;
-
-            // Save files to mega, async, no parallel!
-            foreach (var vidData in downloadedList)
-            {
-                bool markAsComplete = true;
-                INode uploadedNode = null;
-
-                // Duplicate filename
-                if (vidData.Item1.IsDuplicate)
-                    _logger.Warning("YoutubeDownloadService: Not downloading which already has a file with the same name. Marking as complete instead");
-                // Failed to download for some reason
-                else if (!vidData.Item1.IsDownloaded)
-                    markAsComplete = false; // happens when download failed
-                // Upload file to mega
-                else
-                    uploadedNode = await _megaApiHandler.UploadFile(vidData.Item2, targetDirNode);
-
-                // Mark as downloaded in database
-                if (markAsComplete)
-                    await _youtubeQueries.MarkVideoAsDownloadedAsync(
-                        vidData.Item1.VideoGuid, 
-                        vidData.Item1.PlaylistGuid, 
-                        uploadedNode == null ? null : uploadedNode.Id);
-            }
+                await Task.WhenAll(runningDownloaders);
+            if (!stoppingToken.IsCancellationRequested)
+                await Task.WhenAll(runningUploaders);
         }
         catch (Exception ex)
         {
@@ -194,7 +203,7 @@ public class YoutubeDownloadService : BackgroundService
         }
         finally
         {
-            foreach (string path in downloadedList.Select(x => x.Item2))
+            foreach (string path in tempFiles)
                 if (File.Exists(path))
                     File.Delete(path);
         }
