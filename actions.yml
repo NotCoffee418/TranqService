@@ -1,0 +1,41 @@
+name: Build, test and deploy
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 6.0.x
+        
+    - name: Restore dependencies
+      run: dotnet restore
+      
+    - name: Build
+      run: dotnet build --no-restore
+      
+    - name: Test
+      run: dotnet test --no-build --verbosity normal
+      
+    - name: Deploy
+      uses: appleboy/ssh-action@master
+      with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          password: ${{ secrets.SSH_PASS }}
+          port: 22
+          script: | 
+            git clone https://github.com/NotCoffee418/TranqService.git            
+            cd ~/TranqService
+            docker-compose -f C:\Users\tranq\Documents\GitHub\TranqService\docker-compose.deploy.yml down
+            docker-compose -f C:\Users\tranq\Documents\GitHub\TranqService\docker-compose.deploy.yml up -d
+            
