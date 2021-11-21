@@ -31,7 +31,8 @@ jobs:
       with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
-          password: ${{ secrets.SSH_PASS }}
+          key: ${{ secrets.SSH_KEY }}
+          passphrase: ${{ secrets.SSH_PASS }}
           port: 22
           script: | 
             git clone https://github.com/NotCoffee418/TranqService.git            
