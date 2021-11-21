@@ -1,4 +1,5 @@
 ﻿using YoutubeExplode;
+using YoutubeExplode.Exceptions;
 using YoutubeExplode.Videos.Streams;
 
 namespace TranqService.Shared.Logic;
@@ -75,9 +76,23 @@ public class YoutubeSaveHelper : IYoutubeSaveHelper
         }
         catch (Exception ex)
         {
-            // Log exception
-            _logger.Warning("YoutubeDownloaderService failed to download video: {0} {1} {2}", 
-                videoData.VideoGuid, videoData.Name, ex);
+            // Caused by georestriction, age restriction, removed, etc
+            if (ex is VideoUnplayableException || 
+                (ex is HttpRequestException && ((HttpRequestException)ex).StatusCode == System.Net.HttpStatusCode.Forbidden))
+            {
+                string msg = $"Cannot automatically download this video. " +
+                    $"Please download it manually instead. https://youtu.be/{videoData.VideoGuid}";
+                _logger.Warning(msg);
+                await _processedYoutubeVideoQueries.MarkVideoAsDownloadedAsync(videoData.VideoGuid, videoData.PlaylistGuid, null);
+            }
+
+            // Handle other exceptions, dont mark as complete, will retry later
+            else
+            {
+                // Log exception
+                _logger.Error("YoutubeDownloaderService failed to download video: {0} {1} {2}",
+                    videoData.VideoGuid, videoData.Name, ex);
+            }
 
             // Cleanup on fail
             if (File.Exists(outputPath))
