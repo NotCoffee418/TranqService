@@ -97,7 +97,7 @@ public class YoutubeDownloadService : BackgroundService
         if (await _youtubeQueries.CountDownloadedVideosAsync() < 10)
         {
             // Wait for mega
-            _logger.Warning("YoutubeThis is a fresh database. Waiting for mega to be explored before downloading.");
+            _logger.Warning("YoutubeDownloadService: This is a fresh database. Waiting for mega to be explored before downloading.");
             targetDirNode = await backgroundMegaPrep;
 
             // Get all known filenames in this directory
@@ -106,8 +106,23 @@ public class YoutubeDownloadService : BackgroundService
                 .ToList();
 
             // Filter out files we already have
+            var alreadyDownloadedFiles = allVideosToDownload
+                .Where(x => knownFiles.Contains(x.GetFileName(outputFormat)))
+                .ToList();
+
+            // mark them as complete
+            _logger.Warning(
+                "Found {0} files which were already downloaded. Marking them as complete in the database.", 
+                alreadyDownloadedFiles.Count());
+            var markerTasks = new List<Task>();
+            alreadyDownloadedFiles.ForEach(x => markerTasks.Add(
+                _youtubeQueries.MarkVideoAsDownloadedAsync(x.VideoGuid, x.PlaylistGuid, null)));
+            await Task.WhenAll(markerTasks);
+
+            // Continue downloading the files we dont have yet
+            var alreadyDownloadedVideoGuids = alreadyDownloadedFiles.Select(x => x.VideoGuid);
             allVideosToDownload = allVideosToDownload
-                .Where(x => !knownFiles.Contains(x.GetFileName(outputFormat)))
+                .Where(x => alreadyDownloadedVideoGuids.Contains(x.VideoGuid))
                 .ToList();
         }
         
