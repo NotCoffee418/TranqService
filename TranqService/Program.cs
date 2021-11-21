@@ -32,4 +32,13 @@ Log.Logger = new LoggerConfiguration()
 // Notify of restart
 Log.Logger.Warning("Tranqservice (re)started.");
 
-await host.RunAsync();
+try
+{
+    await host.RunAsync();
+}
+catch (Exception ex)
+{
+    Log.Logger.Fatal(
+        "TranqService has crashed!" + Environment.NewLine + "{0}" + Environment.NewLine + "{1}", 
+        ex.Message, ex.StackTrace);
+}
