@@ -52,13 +52,30 @@ namespace TranqService.Shared.ApiHandlers
                     .Select(x => new YoutubeVideoModel()
                     {
                         VideoGuid = x.Snippet.ResourceId.VideoId,
-                        Name = x.Snippet.Title,
-                        Uploader = x.Snippet.VideoOwnerChannelTitle,
+                        Name = Escape(x.Snippet.Title),
+                        Uploader = Escape(x.Snippet.VideoOwnerChannelTitle),
                         PlaylistGuid = playlistId
                     }));
             } while (response.NextPageToken != null);
 
             return result;
+        }
+
+        /// <summary>
+        /// Cleans path for usage in filesystem
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public string Escape(string input)
+        {
+            if (input == null)
+                return "NULL";
+
+            foreach (char c in Path.GetInvalidFileNameChars())
+            {
+                input = input.Replace(c, '_');
+            }
+            return input;
         }
     }
 }

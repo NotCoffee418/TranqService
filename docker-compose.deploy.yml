@@ -2,6 +2,7 @@ version: '3.4'
 
 services:
   tranqservice:
+    container_name: TranqService.Service
     image: ${DOCKER_REGISTRY-}tranqservice
     build:
       context: .

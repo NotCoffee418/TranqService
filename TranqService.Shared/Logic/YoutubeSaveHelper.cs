@@ -76,7 +76,7 @@ public class YoutubeSaveHelper : IYoutubeSaveHelper
         catch (Exception ex)
         {
             // Log exception
-            _logger.Warning("YoutubeDownloaderService failed to download video: {0} {1}", 
+            _logger.Warning("YoutubeDownloaderService failed to download video: {0} {1} {2}", 
                 videoData.VideoGuid, videoData.Name, ex);
 
             // Cleanup on fail
