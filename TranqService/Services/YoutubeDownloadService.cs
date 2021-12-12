@@ -1,4 +1,6 @@
 using CG.Web.MegaApiClient;
+using Polly;
+using Polly.Contrib.WaitAndRetry;
 using TranqService.Shared.DataAccess;
 
 namespace TranqService.Services;
@@ -140,7 +142,7 @@ public class YoutubeDownloadService : BackgroundService
             while (!stoppingToken.IsCancellationRequested && queue.Count > 0)
             {
                 // Hold while max allowed parallel tasks is running
-                while (runningDownloaders.Where(x => !x.IsCompleted).Count() >= 5)
+                while (runningDownloaders.Where(x => !x.IsCompleted).Count() >= 2)
                     await Task.Delay(200);
 
                 // Store download location for video
@@ -151,9 +153,19 @@ public class YoutubeDownloadService : BackgroundService
                 // Run a fresh task
                 Task dlTask = Task.Run(async () =>
                 {
+                    // Prepare retry policy
+                    var delay = Backoff.ConstantBackoff(TimeSpan.FromMilliseconds(20000), retryCount: 5);
+                    var retryPolicy = Policy
+                        .Handle<Exception>()
+                        .WaitAndRetryAsync(delay);
+
                     // Download the video
-                    await _youtubeSaveHelper.DownloadVideoAsync(
-                        videoData, tmpPath, outputFormat);
+                    await retryPolicy.ExecuteAsync(async () =>
+                    {
+                        await _youtubeSaveHelper.DownloadVideoAsync(
+                            videoData, tmpPath, outputFormat);
+                    });
+                    
 
                     // Await mega
                     if (targetDirNode == null)
@@ -177,7 +189,8 @@ public class YoutubeDownloadService : BackgroundService
                             markAsComplete = false; // happens when download failed
                                                     // Upload file to mega
                         else
-                            uploadedNode = await _megaApiHandler.UploadFile(tmpPath, targetDirNode);
+                            await retryPolicy.ExecuteAsync(async () => 
+                                uploadedNode = await _megaApiHandler.UploadFile(tmpPath, targetDirNode));
 
                         // Mark as downloaded in database
                         if (markAsComplete)
