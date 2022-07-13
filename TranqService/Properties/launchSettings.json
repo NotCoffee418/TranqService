@@ -2,6 +2,7 @@
   "profiles": {
     "TranqService": {
       "commandName": "Project",
+      "commandLineArgs": "--configPath \"appsettings.json\"",
       "environmentVariables": {
         "DOTNET_ENVIRONMENT": "Development"
       },

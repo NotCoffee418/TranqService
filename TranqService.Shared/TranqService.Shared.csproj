@@ -4,20 +4,15 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Autofac" Version="6.3.0" />
-    <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="7.2.0" />
-    <PackageReference Include="CoffeeToolkit" Version="1.0.8" />
-    <PackageReference Include="Dapper" Version="2.0.123" />
-    <PackageReference Include="Google.Apis.YouTube.v3" Version="1.55.0.2449" />
-    <PackageReference Include="MegaApiClient" Version="1.10.2" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.1" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="6.0.0" />
-    <PackageReference Include="Npgsql" Version="6.0.2" />
-    <PackageReference Include="Serilog" Version="2.10.0" />
-    <PackageReference Include="YoutubeExplode" Version="6.0.7" />
+    <PackageReference Include="Autofac" Version="6.4.0" />
+    <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="8.0.0" />
+    <PackageReference Include="Google.Apis.YouTube.v3" Version="1.57.0.2735" />
+    <PackageReference Include="Serilog" Version="2.11.0" />
+    <PackageReference Include="YoutubeExplode" Version="6.2.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -26,6 +21,11 @@
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TranqService.Common\TranqService.Common.csproj" />
+    <ProjectReference Include="..\TranqService.Database\TranqService.Database.csproj" />
   </ItemGroup>
 
 </Project>

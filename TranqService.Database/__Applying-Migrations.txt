@@ -1,0 +1,10 @@
+﻿Before migrating:
+- Set TranqService.Database as startup project in debug mode
+- Updates are applied to the db defined in TranqService\TranqService.Database\bin\Debug\net6.0\appsettings.json
+- Operations must run from the solution folder.
+
+To add migration:
+dotnet ef migrations add NAMEOFMIGRATIONHERE --project ./TranqService.Database
+
+To undo a migration: 
+dotnet ef migrations remove --project ./TranqService.Database

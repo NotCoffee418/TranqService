@@ -26,20 +26,3 @@ jobs:
     - name: Test
       run: dotnet test --no-build --verbosity normal TranqService.sln
       
-    - name: Deploy
-      uses: appleboy/ssh-action@master
-      with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_KEY }}
-          port: 22
-          script: | 
-            if [ ! -d ~/TranqService ]
-            then
-                git clone https://github.com/NotCoffee418/TranqService.git    
-            fi
-            cd ~/TranqService
-            git pull
-            docker-compose -f docker-compose.deploy.yml down
-            docker-compose -f docker-compose.deploy.yml up -d --build
-            

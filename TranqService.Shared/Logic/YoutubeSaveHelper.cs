@@ -1,19 +1,15 @@
-﻿using YoutubeExplode;
-using YoutubeExplode.Exceptions;
-using YoutubeExplode.Videos.Streams;
-
-namespace TranqService.Shared.Logic;
+﻿namespace TranqService.Shared.Logic;
 public class YoutubeSaveHelper : IYoutubeSaveHelper
 {
     private IYoutubeApiHandler _youtubeApiHandler;
-    private IYoutubeQueries _processedYoutubeVideoQueries;
+    private IYoutubeVideoInfoQueries _processedYoutubeVideoQueries;
     private ILogger _logger;
 
     YoutubeClient youtube = new YoutubeClient();
 
     public YoutubeSaveHelper(
         IYoutubeApiHandler youtubeApiHandler,
-        IYoutubeQueries processedYoutubeVideoQueries,
+        IYoutubeVideoInfoQueries processedYoutubeVideoQueries,
         ILogger logger)
     {
         _youtubeApiHandler = youtubeApiHandler;
@@ -21,14 +17,14 @@ public class YoutubeSaveHelper : IYoutubeSaveHelper
         _logger = logger;
     }
 
-    public async Task<List<YoutubeVideoModel>> GetUndownloadedVideosAsync(string playlistId)
+    public async Task<List<YoutubeVideoInfo>> GetUndownloadedVideosAsync(string playlistId)
     {
         // Get all video IDs
         var allVideosInPlaylist = await _youtubeApiHandler.GetAllPlaylistItemsAsync(playlistId);
 
         // Get all previously downloaded videos
         var allPreviouslyDownloadedVideos = (await _processedYoutubeVideoQueries
-            .GetDownloadedVideoIdsInPlaylistAsync(playlistId))
+            .GetDownloadedVideoGuidsInPlaylistAsync(playlistId))
             .ToList();
 
         // Filter out undownloaded
@@ -44,13 +40,13 @@ public class YoutubeSaveHelper : IYoutubeSaveHelper
     /// <param name="outputDir"></param>
     /// <param name="outputFormat"></param>
     /// <returns>success?</returns>
-    public async Task DownloadVideoAsync(YoutubeVideoModel videoData, string outputPath, string outputFormat)
+    public async Task DownloadVideoAsync(YoutubeVideoInfo videoData, string outputPath, string outputFormat)
     {
         try
         {
             // Log
             _logger.Information(
-                "YoutubeDownloaderService: Downloading {0} {1}", 
+                "YoutubeDownloaderService: Downloading {0} {1}",
                 videoData.VideoGuid, videoData.Name);
 
             // Get stream data
@@ -72,33 +68,25 @@ public class YoutubeSaveHelper : IYoutubeSaveHelper
             _logger.Information(
                 "YoutubeDownloaderService: Finished downloading {0} {1}",
                 videoData.VideoGuid, videoData.Name);
-            videoData.IsDownloaded = true;
         }
         catch (Exception ex)
         {
             // Caused by georestriction, age restriction, removed, etc
-            if (ex is VideoUnplayableException || 
+            if (ex is VideoUnplayableException ||
                 (ex is HttpRequestException && ((HttpRequestException)ex).StatusCode == System.Net.HttpStatusCode.Forbidden))
             {
                 string msg = $"Cannot automatically download this video. " +
                     $"Please download it manually instead. https://youtu.be/{videoData.VideoGuid}";
                 _logger.Warning(msg);
-                await _processedYoutubeVideoQueries.MarkVideoAsDownloadedAsync(videoData.VideoGuid, videoData.PlaylistGuid, null);
+                await _processedYoutubeVideoQueries.MarkVideoAsDownloadedAsync(videoData);
             }
 
             // Handle other exceptions, dont mark as complete, will retry later
-            else
-            {
-                // Log exception
-                _logger.Error("YoutubeDownloaderService failed to download video: {0} {1} {2}",
-                    videoData.VideoGuid, videoData.Name, ex);
-            }
+            else throw;
 
             // Cleanup on fail
             if (File.Exists(outputPath))
                 File.Delete(outputPath);
-
-            videoData.IsDownloaded = false;
         }
     }
 }

@@ -350,4 +350,7 @@ MigrationBackup/
 .ionide/
 
 # Ignore real appsettings
-TranqService/appsettings.json
+appsettings.json
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal

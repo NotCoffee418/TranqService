@@ -1,15 +1,12 @@
-using Autofac;
-using Autofac.Extensions.DependencyInjection;
-using Serilog;
-using Serilog.Events;
-using Serilog.Sinks.Discord;
-using System.Reflection;
-using TranqService.Shared;
+// Get appsettings path from commandline args
+int configPathKeyIndex = Array.IndexOf(args, "--configPath");
+if (configPathKeyIndex == -1 || configPathKeyIndex + 1 < args.Length - 1) 
+    throw new Exception("No config path specified.");
+string configPath = args[configPathKeyIndex + 1];
 
 // Access config manually for DI building
-string appsettingsPath = "/app/appsettings.json";
 IConfiguration configuration = new ConfigurationBuilder()
-        .AddJsonFile(appsettingsPath)
+        .AddJsonFile(configPath)
         .Build();
 ulong discordWebhookId = Convert.ToUInt64(configuration["Config:DiscordWebhookId"]);
 string discordWebhookSecret = configuration["Config:DiscordWebhookSecret"];
@@ -31,7 +28,13 @@ IHost host = Host.CreateDefaultBuilder(args)
         services.AddHostedService<YoutubeDownloadService>();
     })
     .UseServiceProviderFactory(new AutofacServiceProviderFactory())
-    .ConfigureContainer<ContainerBuilder>(ContainerConfig.Configure)
+    .ConfigureContainer<ContainerBuilder>(builder =>
+    {
+        builder.RegisterInstance(configuration).As<IConfiguration>().SingleInstance();
+        builder.ConfigureShared();
+        builder.ConfigureDatabase();
+        builder.ConfigureCommon();
+    })
     .UseSerilog(Log.Logger)
     .Build();
 
