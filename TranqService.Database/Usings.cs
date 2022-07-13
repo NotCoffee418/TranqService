@@ -1,0 +1,13 @@
+﻿global using System;
+global using System.Collections.Generic;
+global using System.Linq;
+global using System.Text;
+global using System.Threading.Tasks;
+global using Microsoft.Extensions.Configuration;
+global using System.Reflection;
+global using Microsoft.EntityFrameworkCore;
+global using Autofac;
+global using TranqService.Common.Extensions;
+global using System.ComponentModel.DataAnnotations;
+global using TranqService.Database.Models;
+global using Microsoft.EntityFrameworkCore.Design;

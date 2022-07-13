@@ -1,15 +1,12 @@
-﻿namespace TranqService.Shared.Data;
+﻿namespace TranqService.Common.Data;
 public class Config : IConfig
 {
     private IConfiguration _appSettings;
-    private ILogger _logger;
 
     public Config(
-        IConfiguration appSettings,
-        ILogger logger)
+        IConfiguration appSettings)
     {
         _appSettings = appSettings;
-        _logger = logger;
     }
 
 
@@ -17,17 +14,6 @@ public class Config : IConfig
     {
         get => Get<string>("YoutubeApiKey");
     }
-
-    public string MegaUsername
-    {
-        get => Get<string>("MegaUsername");
-    }
-
-    public string MegaPassword
-    {
-        get => Get<string>("MegaPassword");
-    }
-
     public ulong DiscordWebhookId
     {
         get => Get<ulong>("DiscordWebhookId");
@@ -54,6 +40,14 @@ public class Config : IConfig
         }
     }
 
+    /// <summary>
+    /// Should be stored in mega drive ideally
+    /// </summary>
+    public string SqliteFilePath
+    {
+        get => Get<string>("SqliteFilePath");
+    }
+
 
     private T Get<T>(string name)
     {
@@ -67,7 +61,6 @@ public class Config : IConfig
         if (value == null)
         {
             string exMsg = $"Environment variable or app setting for {name} is not defined.";
-            _logger.Fatal(exMsg);
             throw new Exception(exMsg);
         }
 
@@ -90,7 +83,6 @@ public class Config : IConfig
         catch (Exception ex)
         {
             string exMsg = "Failed to find or parse data for {name} into dictionary.";
-            _logger.Fatal(exMsg, ex);
             throw new Exception(exMsg, ex);
         }
     }
