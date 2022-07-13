@@ -27,6 +27,10 @@ IHost host = Host.CreateDefaultBuilder(args)
     {
         services.AddHostedService<YoutubeDownloadService>();
     })
+    .UseWindowsService(options =>
+    {
+        options.ServiceName = "TranqService";
+    })
     .UseServiceProviderFactory(new AutofacServiceProviderFactory())
     .ConfigureContainer<ContainerBuilder>(builder =>
     {
