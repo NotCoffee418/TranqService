@@ -164,7 +164,7 @@ public class YoutubeDownloadService : BackgroundService
                         
                         // Move the file to it's final destination
                         if (downloadResult.Outcome == OutcomeType.Successful)
-                            File.Move(tmpPath, finalPath);
+                            File.Move(tmpPath, finalPath, overwrite:true);
                         else
                         {
                             // Log exception
