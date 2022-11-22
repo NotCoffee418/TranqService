@@ -26,7 +26,7 @@ Background service to watch YouTube playlists and download any videos added to t
 1. Ensure you have .NET SDK installed (https://docs.microsoft.com/en-us/dotnet/core/install/linux)
 2. Clone the repo and cd into it
 3. `chmod +x install-linux.sh`
-4. `./install-linux.sh -c "/path/to/appsettings.json" -d "/deploy/directory/here"`
+4. `sudo ./install-linux.sh -u linuxRunnerUser -c "/path/to/appsettings.json" -d "/deploy/directory/here"`
 
 # Update
 1. Stop the service

@@ -12,7 +12,7 @@ public class YoutubeVideoInfoQueries : IYoutubeVideoInfoQueries
     {
         using var context = _db.GetContext();
         return await context.YoutubeVideoInfos
-            .Where(x => string.Equals(x.PlaylistGuid, playlistGuid, StringComparison.OrdinalIgnoreCase))
+            .Where(x => x.PlaylistGuid.ToLower() == playlistGuid.ToLower())
             .Select(x => x.VideoGuid)
             .ToListAsync();
     }
