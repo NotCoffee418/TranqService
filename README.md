@@ -9,6 +9,7 @@ Background service to watch YouTube playlists and download any videos added to t
 4. Get a [YouTube Data API v3](https://console.cloud.google.com/apis/library/youtube.googleapis.com) key.
 
 ## Installation
+### Windows
 1. Move latest release build to MEGA/Services/TranqService/deploy
 2. Set up the config file at MEGA/Services/TranqService/data/appsettings.json
 3. Point sqlite path to MEGA/Services/TranqService/data/TranqService.sqlite
@@ -20,6 +21,12 @@ Background service to watch YouTube playlists and download any videos added to t
     The playlist ID can be found on youtube by opening a playlist and looking at the URL:
     https://www.youtube.com/watch?v=VideoIdHere&list=PlaylistIdHere
 5. Powershell: `New-Service -Name "TranqService" -BinaryPathName '"MEGAFOLDER\Services\deploy\TranqService.exe" --configPath "MEGAFOLDER\Services\data\appsettings.json"'`
+
+### Linux
+1. Ensure you have .NET SDK installed (https://docs.microsoft.com/en-us/dotnet/core/install/linux)
+2. Clone the repo and cd into it
+3. `chmod +x install-linux.sh`
+4. `./install-linux.sh -c "/path/to/appsettings.json" -d "/deploy/directory/here"`
 
 # Update
 1. Stop the service
