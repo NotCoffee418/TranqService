@@ -3,7 +3,7 @@ Background service to watch YouTube playlists and download any videos added to t
 
 
 ## Installation Prerequisites
-1. Install [.NET 6 Runtime](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-6.0.8-windows-x64-installer)
+1. Install [.NET 7 Runtime](https://dotnet.microsoft.com/en-us/download/dotnet/7.0)
 2. Install [Powershell 7+](https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-windows)
 3. Create a discord server for bot logs with a webhook for the channel.
 4. Get a [YouTube Data API v3](https://console.cloud.google.com/apis/library/youtube.googleapis.com) key.
