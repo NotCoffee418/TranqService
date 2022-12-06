@@ -17,10 +17,10 @@ public class YtdlpInterop : IYtdlpInterop
     const string AudioFormatData = "-x --audio-format mp3 --prefer-ffmpeg";
 
 
-    public Task<bool> DownloadVideo(string videoUrl, string savePath)
+    public Task<bool> DownloadVideoAsync(string videoUrl, string savePath)
         => RunYtdlpCommandAsync(videoUrl, savePath, VideoFormatData);
 
-    public Task<bool> DownloadAudio(string videoUrl, string savePath)
+    public Task<bool> DownloadAudioAsync(string videoUrl, string savePath)
         => RunYtdlpCommandAsync(videoUrl, savePath, AudioFormatData);
 
     public async Task<bool> ValidateFfmpegInstallationAsync()
@@ -40,14 +40,27 @@ public class YtdlpInterop : IYtdlpInterop
         // Set working directory (required for ffmpeg)
         // Also helps with linux support
         string args = $"{formatData} -o \"{outputFile}\" {inputUrl}";
-        string outputStr = await RunCommandAsync(workingDir, ytdlpExe, args);
+        try
+        {
+            string outputStr = await RunCommandAsync(workingDir, ytdlpExe, args);
 
-        // Validate
-        if (!File.Exists(outputFile))
-            throw new Exception("RunYtdlpCommandAsync(): Download indicates completion but output file does not exist");
+            // Validate
+            if (!File.Exists(outputFile))
+                throw new Exception("RunYtdlpCommandAsync(): Download indicates completion but output file does not exist");
 
-        // ...
+            // ..
+            // Additional validation should go here
 
+        }
+        catch (Exception ex)
+        {
+
+            // Cleanup on fail
+            if (File.Exists(outputFile))
+                File.Delete(outputFile);
+            _logger.Error(ex.Message, ex);
+            return false;
+        }
         return true;
     }
 

@@ -1,3 +1,5 @@
+using TranqService.Shared.DataAccess.Ytdlp;
+
 namespace TranqService.Services;
 public class YoutubeDownloadService : BackgroundService
 {
@@ -6,19 +8,22 @@ public class YoutubeDownloadService : BackgroundService
     private readonly IYoutubeVideoInfoQueries _youtubeQueries;
     private readonly IYtdlpUpdater _ytdlpUpdater;
     private readonly IConfig _config;
+    private readonly IYtdlpInterop _ytdlp;
 
     public YoutubeDownloadService(
         Serilog.ILogger logger,
         IYoutubeSaveHelper youtubeSaveHelper,
         IYoutubeVideoInfoQueries youtubeQueries,
         IYtdlpUpdater ytdlpUpdater,
-        IConfig config)
+        IConfig config,
+        IYtdlpInterop ytdlp)
     {
         _logger = logger;
         _youtubeSaveHelper = youtubeSaveHelper;
         _youtubeQueries = youtubeQueries;
         _ytdlpUpdater = ytdlpUpdater;
         _config = config;
+        _ytdlp = ytdlp;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -166,7 +171,20 @@ public class YoutubeDownloadService : BackgroundService
 
                         // Download the video to temp path
                         PolicyResult downloadResult = await retryPolicy.ExecuteAndCaptureAsync(async () =>
-                            await _youtubeSaveHelper.DownloadVideoAsync(videoData, tmpPath, outputFormat));
+                        {
+                            string videoUrl = $"https://www.youtube.com/watch?v={videoData.VideoGuid}";
+                            switch (outputFormat)
+                            {
+                                case "mp3":
+                                    await _ytdlp.DownloadAudioAsync(videoUrl, tmpPath);
+                                    break;
+                                case "mp4":
+                                    await _ytdlp.DownloadVideoAsync(videoUrl, tmpPath);
+                                    break;
+                                default:
+                                    throw new ArgumentException("Invalid output format specified");
+                            }                            
+                        });
                         
                         // Move the file to it's final destination
                         if (downloadResult.Outcome == OutcomeType.Successful)

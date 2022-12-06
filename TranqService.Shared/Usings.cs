@@ -17,9 +17,6 @@ global using Google.Apis.Util;
 global using Google.Apis.YouTube.v3;
 global using Microsoft.Extensions.Configuration;
 global using Serilog;
-global using YoutubeExplode;
-global using YoutubeExplode.Exceptions;
-global using YoutubeExplode.Videos.Streams;
 global using CliWrap;
 global using CliWrap.Buffered;
 

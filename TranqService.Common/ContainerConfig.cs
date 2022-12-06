@@ -8,7 +8,7 @@ public static class ContainerConfig
     {
         // Register runner
         builder.BulkRegister(
-            "TranqService.Common.Data"
+            "TranqService.Common"
             );
     }
 }

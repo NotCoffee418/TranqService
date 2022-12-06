@@ -24,8 +24,8 @@ public class YtdlpInteropTests
         string audioSavePath = pathHelper.GetAppdataPath(true, "UnitTestDownloads", "test-working-audio.mp3");
 
         // Download the content
-        await ytdlpInterop.DownloadVideo(TestVideoUrl, videoSavePath);
-        await ytdlpInterop.DownloadAudio(TestVideoUrl, audioSavePath);
+        await ytdlpInterop.DownloadVideoAsync(TestVideoUrl, videoSavePath);
+        await ytdlpInterop.DownloadAudioAsync(TestVideoUrl, audioSavePath);
 
         Assert.True(File.Exists(videoSavePath));
         Assert.True(File.Exists(audioSavePath));
