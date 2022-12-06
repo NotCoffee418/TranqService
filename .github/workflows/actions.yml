@@ -2,13 +2,16 @@ name: Build, test and deploy
 
 on:
   push:
-    branches: [ main ]
+    branches:
+    - main
+    - dev
   pull_request:
-    branches: [ main ]
+    - main
+    - dev
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
     - uses: actions/checkout@v2
