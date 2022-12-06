@@ -20,3 +20,4 @@ global using TranqService.Shared;
 global using TranqService.Database.Queries;
 global using TranqService.Common.Data;
 global using TranqService.Database.Models;
+global using TranqService.Common.DataAccess;

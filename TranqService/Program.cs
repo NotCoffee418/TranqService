@@ -11,12 +11,16 @@ IConfiguration configuration = new ConfigurationBuilder()
 ulong discordWebhookId = Convert.ToUInt64(configuration["Config:DiscordWebhookId"]);
 string discordWebhookSecret = configuration["Config:DiscordWebhookSecret"];
 
+// Get log file path for this session
+string logFilePath = LogFileManager.CleanupAndGetNewLogFilePath();
+
 // init logger
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Information()
     .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
     .Enrich.FromLogContext()
     .WriteTo.Console(LogEventLevel.Information)
+    .WriteTo.File(logFilePath, LogEventLevel.Information)
     .WriteTo.Discord(discordWebhookId, discordWebhookSecret, 
         restrictedToMinimumLevel: LogEventLevel.Warning)
     .CreateLogger();
