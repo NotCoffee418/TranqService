@@ -1,29 +1,37 @@
+using TranqService.Ytdlp.Logic;
+
 namespace TranqService.Services;
 public class YoutubeDownloadService : BackgroundService
 {
     private readonly Serilog.ILogger _logger;
     private readonly IYoutubeSaveHelper _youtubeSaveHelper;
     private readonly IYoutubeVideoInfoQueries _youtubeQueries;
+    private readonly IYtdlpUpdater _ytdlpUpdater;
     private readonly IConfig _config;
 
     public YoutubeDownloadService(
         Serilog.ILogger logger,
         IYoutubeSaveHelper youtubeSaveHelper,
         IYoutubeVideoInfoQueries youtubeQueries,
+        IYtdlpUpdater ytdlpUpdater,
         IConfig config)
     {
         _logger = logger;
         _youtubeSaveHelper = youtubeSaveHelper;
         _youtubeQueries = youtubeQueries;
+        _ytdlpUpdater = ytdlpUpdater;
         _config = config;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        // Update yt-dlp once on startup
+        await _ytdlpUpdater.TryUpdateYtdlpAsync();
+
+        // Start checking for new downloadable items
         while (!stoppingToken.IsCancellationRequested)
         {
             _logger.Information("YoutubeDownloadService: Checking for youtube downloads at: {0}", DateTimeOffset.Now);
-
 
             // Process all playlists
             await ProcessAllPlaylists(stoppingToken);

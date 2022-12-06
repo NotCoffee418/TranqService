@@ -1,7 +1,4 @@
-﻿using System.IO;
-using TranqService.Ytdlp.Logic;
-
-namespace TranqService.Tests.Ytdlp.Logic;
+﻿namespace TranqService.Tests.Ytdlp.Logic;
 
 public class YtdlpUpdaterTests
 {
@@ -11,13 +8,14 @@ public class YtdlpUpdaterTests
         // Create instance
         using var mock = AutoMock.GetLoose(builder => builder.AddMocked());
         var updater = mock.Create<IYtdlpUpdater>();
+        var ytdlpPaths = mock.Create<IYtdlpPaths>();
 
         // Run updater
         await updater.TryUpdateYtdlpAsync();
 
         // Assertion prep
-        string versionFilePath = updater.GetYtdlpVersionFilePath();
-        string exePath = updater.GetYtdlpExePath();
+        string versionFilePath = ytdlpPaths.GetYtdlpVersionFilePath();
+        string exePath = ytdlpPaths.GetYtdlpExePath();
 
         Assert.NotNull(versionFilePath);
         Assert.NotNull(exePath);

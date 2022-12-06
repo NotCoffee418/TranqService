@@ -2,16 +2,16 @@
 
 public class YtdlpUpdater : IYtdlpUpdater
 {
-    private IPathHelper _pathHelper;
+    private IYtdlpPaths _ytdlpPaths;
     private IGithubAccess _githubAccess;
     private ILogger _logger;
 
     public YtdlpUpdater(
-        IPathHelper pathHelper,
+        IYtdlpPaths ytdlpPaths,
         IGithubAccess githubAccess,
         ILogger logger)
     {
-        _pathHelper = pathHelper;
+        _ytdlpPaths = ytdlpPaths;
         _githubAccess = githubAccess;
         _logger = logger;
     }
@@ -41,8 +41,8 @@ public class YtdlpUpdater : IYtdlpUpdater
         }
 
         // Update needed, download the exe
-        string exePath = GetYtdlpExePath();
-        string versionFilePath = GetYtdlpVersionFilePath();
+        string exePath = _ytdlpPaths.GetYtdlpExePath();
+        string versionFilePath = _ytdlpPaths.GetYtdlpVersionFilePath();
         try
         {
             var httpResult = await AppConstants.HTTPCLIENT.GetAsync(
@@ -65,11 +65,6 @@ public class YtdlpUpdater : IYtdlpUpdater
         UpdateSemaphore.Release();
     }
 
-    public string GetYtdlpExePath()
-        => _pathHelper.GetAppdataPath(true, "yt-dlp", "yt-dlp.exe");
-    public string GetYtdlpVersionFilePath()
-        => _pathHelper.GetAppdataPath(true, "yt-dlp", "version.txt");
-
     /// <summary>
     /// Version is inferred from publish time, not actual version.
     /// Returns null when not installed (correctly).
@@ -78,10 +73,10 @@ public class YtdlpUpdater : IYtdlpUpdater
     public async Task<DateTime?> GetYtdlpLocalVersionTimeAsync()
     {
         // Ensure exe exists, otherwise assume something went wrong and reinstall
-        if (!File.Exists(GetYtdlpExePath())) return null;
+        if (!File.Exists(_ytdlpPaths.GetYtdlpExePath())) return null;
 
         // Ensure version file exists
-        string versionFilePath = GetYtdlpVersionFilePath();
+        string versionFilePath = _ytdlpPaths.GetYtdlpVersionFilePath();
         if (!File.Exists(versionFilePath)) return null;
 
         // Attempt to extract version

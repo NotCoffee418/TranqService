@@ -6,3 +6,5 @@ global using TranqService.Common.Extensions;
 global using System.Net.Http;
 global using TranqService.Shared.DataAccess;
 global using TranqService.Ytdlp.DataAccess;
+global using TranqService.Common.Attributes;
+global using static TranqService.Common.Attributes.DependencyScopeAttribute;
