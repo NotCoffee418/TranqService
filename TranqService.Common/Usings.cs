@@ -7,3 +7,5 @@ global using Microsoft.Extensions.Configuration;
 global using Autofac;
 global using System.Reflection;
 global using TranqService.Common.Extensions;
+global using TranqService.Common.Attributes;
+global using static TranqService.Common.Attributes.DependencyScopeAttribute;

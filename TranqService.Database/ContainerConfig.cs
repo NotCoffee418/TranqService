@@ -9,7 +9,7 @@ public static class ContainerConfig
         // Register runner
         builder.RegisterType<Db>().As<IDb>();
         builder.BulkRegister(
-            "TranqService.Database.Queries"
+            "TranqService.Database"
             );
     }
 }

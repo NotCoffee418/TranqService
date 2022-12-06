@@ -3,16 +3,20 @@
 public static class DependencyInjectionExtensions
 {
     /// <summary>
-    /// Registers all classes which have a corresponding IClassName interface in the same namespace.
+    ///     Register all classes with a corresponding interface in an assembly that start with a path defined in assemblyPaths
     /// </summary>
     /// <param name="af"></param>
-    /// <param name="assemblyPath">ideally use nameof() to select namespace</param>
+    /// <param name="assemblyPaths"></param>
+    /// <exception cref="Exception"></exception>
     public static void BulkRegister(this ContainerBuilder af, params string[] assemblyPaths)
     {
-        var allTypes = Assembly.GetEntryAssembly()
-            .GetReferencedAssemblies()
-            .Where(a => a.FullName.StartsWith("TranqService."))
-            .Select(t => Assembly.Load(t))
+        assemblyPaths = assemblyPaths.Where(x => x.Length > 0).ToArray();
+        var allTypes = AppDomain.CurrentDomain.GetAssemblies()
+            .SelectMany(x => x.GetReferencedAssemblies())
+            .DistinctBy(x => x.FullName)
+            // Get all assemblies starting with anything from assemblyPaths
+            .Where(a => assemblyPaths.Select(x => a.FullName.StartsWith(x)).Where(x => x).Any())
+            .Select(a => Assembly.Load(a))
             .SelectMany(t => t.GetTypes())
             .ToList();
 
@@ -20,10 +24,10 @@ public static class DependencyInjectionExtensions
             foreach (Type t in allTypes)
             {
                 // False if ineligible
-                bool isIneligible = t.Namespace is null ||  // Defined namespace
-                    !t.Namespace.StartsWith(assemblyPath) ||  // matches assemblyPath
-                    !t.IsClass || t.IsAbstract || // is not interface
-                    !t.GetInterfaces().Any(); // Only contine if it has any interfaces
+                bool isIneligible = t.Namespace is null || // Defined namespace
+                                    !t.Namespace.StartsWith(assemblyPath) || // matches assemblyPath
+                                    !t.IsClass || t.IsAbstract || // is not interface
+                                    !t.GetInterfaces().Any(); // Only contine if it has any interfaces
                 if (isIneligible)
                     continue;
 
@@ -36,9 +40,20 @@ public static class DependencyInjectionExtensions
                     continue;
 
                 // Begin registration
-                af.RegisterType(t)
-                    .As(correspondingInterfaces.First())
-                    .InstancePerLifetimeScope();
+                var typeRegistration = af.RegisterType(t)
+                    .As(correspondingInterfaces.First());
+
+                // Extract scope info
+                DependencyScopeAttribute? scope = t.GetCustomAttribute<DependencyScopeAttribute>();
+                if (scope is null || scope.ScopeDefinition == Scope.Undefined) // Default
+                    typeRegistration.InstancePerLifetimeScope();
+                else if (scope.ScopeDefinition == Scope.PerDependency)
+                    typeRegistration.InstancePerDependency();
+                else if (scope.ScopeDefinition == Scope.Single)
+                    typeRegistration.SingleInstance();
+                else if (scope.ScopeDefinition == Scope.Lifetime)
+                    typeRegistration.InstancePerLifetimeScope();
+                else throw new Exception("BulkRegister does not know how to handle scope " + scope.ScopeDefinition);
             }
     }
 }

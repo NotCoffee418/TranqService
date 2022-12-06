@@ -7,14 +7,16 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TranqService", "TranqServic
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TranqService.Shared", "TranqService.Shared\TranqService.Shared.csproj", "{E4EC473A-A65A-4D99-881B-2F05C453FDBF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TranqService.Database", "TranqService.Database\TranqService.Database.csproj", "{3E6F64D6-9D04-4AC9-85E2-30A2E8F10460}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TranqService.Database", "TranqService.Database\TranqService.Database.csproj", "{3E6F64D6-9D04-4AC9-85E2-30A2E8F10460}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TranqService.Common", "TranqService.Common\TranqService.Common.csproj", "{D5DC0237-5B8F-449E-A101-432F2607ECBD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TranqService.Common", "TranqService.Common\TranqService.Common.csproj", "{D5DC0237-5B8F-449E-A101-432F2607ECBD}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{C6AD0804-B8AF-44F1-8986-47E4D6C90D31}"
 	ProjectSection(SolutionItems) = preProject
 		README.md = README.md
 	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TranqService.Tests", "TranqService.Tests\TranqService.Tests.csproj", "{EDD54256-9147-44D4-9440-36196059124D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -38,6 +40,10 @@ Global
 		{D5DC0237-5B8F-449E-A101-432F2607ECBD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D5DC0237-5B8F-449E-A101-432F2607ECBD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D5DC0237-5B8F-449E-A101-432F2607ECBD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EDD54256-9147-44D4-9440-36196059124D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EDD54256-9147-44D4-9440-36196059124D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EDD54256-9147-44D4-9440-36196059124D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EDD54256-9147-44D4-9440-36196059124D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
