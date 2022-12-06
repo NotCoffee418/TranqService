@@ -7,3 +7,4 @@ global using TranqService.Common;
 global using TranqService.Database;
 global using TranqService.Shared;
 global using TranqService.Ytdlp;
+global using TranqService.Shared.DataAccess;

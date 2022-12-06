@@ -16,14 +16,29 @@ public class YtdlpUpdater : IYtdlpUpdater
         _logger = logger;
     }
 
+
+    SemaphoreSlim UpdateSemaphore { get; } = new(1, 1);
+
+    /// <summary>
+    /// Validates ytdl installation and updates if needed.
+    /// Threadsafe.
+    /// </summary>
+    /// <returns></returns>
     public async Task TryUpdateYtdlpAsync()
     {
+        // Prevent multiple instances of this function running as it will break things
+        await UpdateSemaphore.WaitAsync();
+
+        // Get version info
         Task<DateTime?> localVersion = GetYtdlpLocalVersionTimeAsync();
         Task<DateTime> remoteVersion = _githubAccess.GetLatestYtDlpVersionAsync();
 
         // Do nothing if up-to-date
         if (await localVersion is not null && await remoteVersion <= await localVersion)
+        {
+            UpdateSemaphore.Release();
             return;
+        }
 
         // Update needed, download the exe
         string exePath = GetYtdlpExePath();
@@ -46,7 +61,8 @@ public class YtdlpUpdater : IYtdlpUpdater
         }
 
         // Update the installed version
-        await File.WriteAllTextAsync(versionFilePath, remoteVersion.ToString());
+        await File.WriteAllTextAsync(versionFilePath, (await remoteVersion).ToString());
+        UpdateSemaphore.Release();
     }
 
     public string GetYtdlpExePath()
