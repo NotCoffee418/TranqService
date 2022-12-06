@@ -1,4 +1,4 @@
-﻿namespace TranqService.Ytdlp.DataAccess
+﻿namespace TranqService.Shared.DataAccess.Ytdlp
 {
     public interface IYtdlpInterop
     {

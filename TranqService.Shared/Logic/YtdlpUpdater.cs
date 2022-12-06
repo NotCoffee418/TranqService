@@ -1,6 +1,7 @@
 ﻿using System.IO.Compression;
+using TranqService.Shared.DataAccess.Ytdlp;
 
-namespace TranqService.Ytdlp.Logic;
+namespace TranqService.Shared.Logic;
 
 [DependencyScope(Scope.Single)]
 public class YtdlpUpdater : IYtdlpUpdater

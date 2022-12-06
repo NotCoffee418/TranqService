@@ -36,6 +36,5 @@
   <ItemGroup>
     <ProjectReference Include="..\TranqService.Database\TranqService.Database.csproj" />
     <ProjectReference Include="..\TranqService.Shared\TranqService.Shared.csproj" />
-    <ProjectReference Include="..\TranqService.Ytdlp\TranqService.Ytdlp.csproj" />
   </ItemGroup>
 </Project>

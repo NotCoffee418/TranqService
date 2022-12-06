@@ -7,7 +7,6 @@ internal static class DependencyBuilder
         // Add caleb config
         builder.ConfigureCommon();
         builder.ConfigureShared();
-        builder.ConfigureYtdlp();
         //builder.ConfigureDatabase() // dont use literally
 
         // Mock IConfiguration

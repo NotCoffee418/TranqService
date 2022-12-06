@@ -1,4 +1,7 @@
-﻿namespace TranqService.Tests.Ytdlp.Logic;
+﻿using TranqService.Shared.DataAccess.Ytdlp;
+using TranqService.Shared.Logic;
+
+namespace TranqService.Tests.Ytdlp.Logic;
 
 public class YtdlpUpdaterTests
 {

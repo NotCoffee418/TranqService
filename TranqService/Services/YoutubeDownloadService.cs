@@ -1,5 +1,3 @@
-using TranqService.Ytdlp.Logic;
-
 namespace TranqService.Services;
 public class YoutubeDownloadService : BackgroundService
 {

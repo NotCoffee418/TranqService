@@ -1,3 +1,5 @@
+using TranqService.Shared.DataAccess.ApiHandlers;
+
 namespace TranqService.Tests.Ytdlp.DataAccess;
 
 public class GithubAccessTests

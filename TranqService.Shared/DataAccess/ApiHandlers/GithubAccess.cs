@@ -1,4 +1,4 @@
-﻿namespace TranqService.Ytdlp.DataAccess;
+﻿namespace TranqService.Shared.DataAccess.ApiHandlers;
 
 public class GithubAccess : IGithubAccess
 {
@@ -18,7 +18,7 @@ public class GithubAccess : IGithubAccess
             // see: https://docs.github.com/en/rest/releases/releases?apiVersion=2022-11-28#list-releases
             // API calls require user agent or we get 403
             HttpRequestMessage req = new HttpRequestMessage(
-                System.Net.Http.HttpMethod.Get, "https://api.github.com/repos/yt-dlp/yt-dlp/releases");
+                HttpMethod.Get, "https://api.github.com/repos/yt-dlp/yt-dlp/releases");
             req.Headers.UserAgent.Add(new("TranqService", "1.0"));
             HttpResponseMessage jsonResponse = await AppConstants.HTTPCLIENT.SendAsync(req);
             if (!jsonResponse.IsSuccessStatusCode)
@@ -28,7 +28,7 @@ public class GithubAccess : IGithubAccess
             }
 
             // Parse response as dynamic
-            dynamic? dynResp = JsonObject.Parse(await jsonResponse.Content.ReadAsStringAsync());
+            dynamic? dynResp = JsonNode.Parse(await jsonResponse.Content.ReadAsStringAsync());
             if (dynResp is null)
                 throw new NullReferenceException("Parsed jsonResponse was null");
 

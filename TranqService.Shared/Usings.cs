@@ -5,6 +5,8 @@ global using System.Linq;
 global using System.Text;
 global using System.Threading.Tasks;
 global using System.Reflection;
+global using System.Text.Json.Nodes;
+global using System.Net.Http;
 
 
 // Nuget packages
@@ -18,6 +20,8 @@ global using Serilog;
 global using YoutubeExplode;
 global using YoutubeExplode.Exceptions;
 global using YoutubeExplode.Videos.Streams;
+global using CliWrap;
+global using CliWrap.Buffered;
 
 
 // Internal
@@ -29,4 +33,6 @@ global using TranqService.Common.Extensions;
 global using Google.Apis.YouTube.v3.Data;
 global using TranqService.Database.Models;
 global using TranqService.Database.Queries;
-
+global using TranqService.Shared.DataAccess;
+global using TranqService.Common.Attributes;
+global using static TranqService.Common.Attributes.DependencyScopeAttribute;

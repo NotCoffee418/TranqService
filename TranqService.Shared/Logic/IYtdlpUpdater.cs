@@ -1,4 +1,4 @@
-﻿namespace TranqService.Ytdlp.Logic
+﻿namespace TranqService.Shared.Logic
 {
     public interface IYtdlpUpdater
     {
