@@ -13,8 +13,8 @@ public class YtdlpInterop : IYtdlpInterop
         _logger = logger;
     }
 
-    const string VideoFormatData = "-f \"bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best\" --prefer-ffmpeg";
-    const string AudioFormatData = "-x --audio-format mp3 --prefer-ffmpeg";
+    const string VideoFormatData = "-f \"bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best\" --prefer-ffmpeg --add-metadata --embed-thumbnail --metadata-from-title \"%(artist)s - %(title)s\"";
+    const string AudioFormatData = "-x --audio-format mp3 --prefer-ffmpeg --add-metadata --embed-thumbnail --metadata-from-title \"%(artist)s - %(title)s\"";
 
 
     public Task<bool> DownloadVideoAsync(string videoUrl, string savePath)
