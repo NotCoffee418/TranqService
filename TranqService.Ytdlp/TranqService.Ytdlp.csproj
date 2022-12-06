@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TranqService.Database\TranqService.Database.csproj" />
+    <ProjectReference Include="..\TranqService.Shared\TranqService.Shared.csproj" />
+  </ItemGroup>
+
+</Project>
