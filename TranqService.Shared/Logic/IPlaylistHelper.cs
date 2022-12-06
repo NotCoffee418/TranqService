@@ -1,6 +1,6 @@
 ﻿namespace TranqService.Shared.Logic
 {
-    public interface IYoutubeSaveHelper
+    public interface IPlaylistHelper
     {
         Task<List<YoutubeVideoInfo>> GetUndownloadedVideosAsync(string playlistId);
     }

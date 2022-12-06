@@ -1,11 +1,11 @@
 ﻿namespace TranqService.Shared.Logic;
-public class YoutubeSaveHelper : IYoutubeSaveHelper
+public class PlaylistHelper : IPlaylistHelper
 {
     private IYoutubeApiHandler _youtubeApiHandler;
     private IYoutubeVideoInfoQueries _processedYoutubeVideoQueries;
     private ILogger _logger;
 
-    public YoutubeSaveHelper(
+    public PlaylistHelper(
         IYoutubeApiHandler youtubeApiHandler,
         IYoutubeVideoInfoQueries processedYoutubeVideoQueries,
         ILogger logger)

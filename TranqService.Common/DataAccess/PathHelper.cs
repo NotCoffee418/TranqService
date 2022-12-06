@@ -1,6 +1,7 @@
-﻿namespace TranqService.Shared.DataAccess;
+﻿namespace TranqService.Common.DataAccess;
 
-public class PathHelper : IPathHelper
+// Called before DI. Don't make interface
+public static class PathHelper
 {
     /// <summary>
     /// Gets a path in the applications local appdata folder.
@@ -9,7 +10,7 @@ public class PathHelper : IPathHelper
     /// <param name="isPathFile">file or directory?</param>
     /// <param name="subPaths">Optional path with subdirectory (if any)</param>
     /// <returns></returns>
-    public string GetAppdataPath(bool isPathFile, params string[]? subPaths)
+    public static string GetAppdataPath(bool isPathFile, params string[]? subPaths)
     {
         List<string> parts = new() {
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),

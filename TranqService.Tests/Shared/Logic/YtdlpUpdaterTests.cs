@@ -1,7 +1,7 @@
 ﻿using TranqService.Shared.DataAccess.Ytdlp;
 using TranqService.Shared.Logic;
 
-namespace TranqService.Tests.Ytdlp.Logic;
+namespace TranqService.Tests.Shared.Logic;
 
 public class YtdlpUpdaterTests
 {

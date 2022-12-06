@@ -4,9 +4,9 @@
     {
         ulong DiscordWebhookId { get; }
         string DiscordWebhookSecret { get; }
-        Dictionary<string, string> MusicPlaylists { get; }
+        Dictionary<string, string> YoutubeMusicPlaylists { get; }
         string SqliteFilePath { get; }
-        Dictionary<string, string> VideoPlaylists { get; }
+        Dictionary<string, string> YoutubeVideoPlaylists { get; }
         string YoutubeApiKey { get; }
     }
 }

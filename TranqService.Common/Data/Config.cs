@@ -24,18 +24,20 @@ public class Config : IConfig
         get => Get<string>("DiscordWebhookSecret");
     }
 
-    public Dictionary<string, string> VideoPlaylists
+    public Dictionary<string, string> YoutubeVideoPlaylists
     {
         get
         {
+            // Don't rename the appsettings.json version, compatability
             return GetDictionary<string, string>("VideoPlaylists"); ;
         }
     }
 
-    public Dictionary<string, string> MusicPlaylists
+    public Dictionary<string, string> YoutubeMusicPlaylists
     {
         get
         {
+            // Don't rename the appsettings.json version, compatability
             return GetDictionary<string, string>("MusicPlaylists"); ;
         }
     }
@@ -51,13 +53,8 @@ public class Config : IConfig
 
     private T Get<T>(string name)
     {
-        // try to get value from environment variable 
-        string? value = Environment.GetEnvironmentVariable(name);
-
-        // Try to get value from appsettings
-        if (value == null)
-            value = _appSettings.GetSection($"Config:{name}").Value;
-
+        // Extract config value
+        string? value = _appSettings.GetSection($"Config:{name}").Value;
         if (value == null)
         {
             string exMsg = $"Environment variable or app setting for {name} is not defined.";
@@ -65,7 +62,14 @@ public class Config : IConfig
         }
 
         // Convert to desired type and return
-        return (T)Convert.ChangeType(value, typeof(T));
+        try
+        {
+            return (T)Convert.ChangeType(value, typeof(T));
+        }
+        catch(Exception ex)
+        {
+            throw new Exception($"Failed to parse config value {name} as {typeof(T).Name}");
+        }
     }
 
     private Dictionary<T, U> GetDictionary<T, U>(string name)

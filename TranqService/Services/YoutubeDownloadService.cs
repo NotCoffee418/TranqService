@@ -4,7 +4,7 @@ namespace TranqService.Services;
 public class YoutubeDownloadService : BackgroundService
 {
     private readonly Serilog.ILogger _logger;
-    private readonly IYoutubeSaveHelper _youtubeSaveHelper;
+    private readonly IPlaylistHelper _youtubeSaveHelper;
     private readonly IYoutubeVideoInfoQueries _youtubeQueries;
     private readonly IYtdlpUpdater _ytdlpUpdater;
     private readonly IConfig _config;
@@ -12,7 +12,7 @@ public class YoutubeDownloadService : BackgroundService
 
     public YoutubeDownloadService(
         Serilog.ILogger logger,
-        IYoutubeSaveHelper youtubeSaveHelper,
+        IPlaylistHelper youtubeSaveHelper,
         IYoutubeVideoInfoQueries youtubeQueries,
         IYtdlpUpdater ytdlpUpdater,
         IConfig config,
@@ -67,7 +67,7 @@ public class YoutubeDownloadService : BackgroundService
         };
 
         // Video playlists
-        foreach (var kvp in _config.VideoPlaylists)
+        foreach (var kvp in _config.YoutubeVideoPlaylists)
         {
             string playlistGuid = kvp.Key;
             string outputDir = kvp.Value;
@@ -84,7 +84,7 @@ public class YoutubeDownloadService : BackgroundService
         }
 
         // Music playlists
-        foreach (var kvp in _config.MusicPlaylists)
+        foreach (var kvp in _config.YoutubeMusicPlaylists)
         {
             string playlistGuid = kvp.Key;
             string outputDir = kvp.Value;
@@ -125,8 +125,7 @@ public class YoutubeDownloadService : BackgroundService
             _logger.Warning(
                 "Found {0} files which were already downloaded. Marking them as complete in the database.", 
                 alreadyDownloadedFiles.Count());
-            alreadyDownloadedFiles.ForEach(async x => 
-                await _youtubeQueries.MarkVideoAsDownloadedAsync(x));
+            await _youtubeQueries.MarkVideosAsDownloadedAsync(alreadyDownloadedFiles.ToArray());
 
             // Continue downloading the files we dont have yet
             var alreadyDownloadedVideoGuids = alreadyDownloadedFiles.Select(x => x.VideoGuid);
@@ -200,7 +199,7 @@ public class YoutubeDownloadService : BackgroundService
 
                     // Mark as downloaded in database
                     if (markAsComplete)
-                        await _youtubeQueries.MarkVideoAsDownloadedAsync(videoData);
+                        await _youtubeQueries.MarkVideosAsDownloadedAsync(videoData);
                 });
                 runningDownloaders.Add(dlTask);
             }
