@@ -2,6 +2,7 @@
 
 namespace TranqService.Ytdlp.Logic;
 
+[DependencyScope(Scope.Single)]
 public class YtdlpUpdater : IYtdlpUpdater
 {
     private IYtdlpPaths _ytdlpPaths;
@@ -25,7 +26,7 @@ public class YtdlpUpdater : IYtdlpUpdater
     }
 
 
-    SemaphoreSlim UpdateSemaphore { get; } = new(1, 1);
+    static SemaphoreSlim UpdateSemaphore { get; } = new(1, 1);
 
     /// <summary>
     /// Validates ytdl installation and updates if needed.
