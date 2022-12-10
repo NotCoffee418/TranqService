@@ -8,19 +8,35 @@ public class PlaylistDownloadEntry : NotificationObject
     /// <summary>
     /// 
     /// </summary>
-    public Platform Platform { get; set; }
+    public Platform VideoPlatform
+    {
+        get => Get<Platform>(nameof(VideoPlatform));
+        set => Set(nameof(VideoPlatform), value);
+    }
 
     /// <summary>
     /// Platform independent playlist ID.
     /// </summary>
-    public string PlaylistId { get; set; }
+    public string PlaylistId
+    {
+        get => Get<string>(nameof(PlaylistId));
+        set => Set(nameof(PlaylistId), value);
+    }
 
-    public DownloadFormat OutputAs { get; set; }
+    public DownloadFormat OutputAs
+    {
+        get => Get<DownloadFormat>(nameof(OutputAs));
+        set => Set(nameof(OutputAs), value);
+    }
 
     /// <summary>
     /// Wildcards ok. Directory does not need to exist yet.
     /// </summary>
-    public string OutputDirectory { get; set; }
+    public string OutputDirectory
+    {
+        get => Get<string>(nameof(OutputDirectory));
+        set => Set(nameof(OutputDirectory), value);
+    }
 
     /// <summary>
     /// Check if the config has any obvious errors. 
@@ -29,7 +45,7 @@ public class PlaylistDownloadEntry : NotificationObject
     /// <returns></returns>
     public (bool IsValid, string? ValidationError) Validate()
     {
-        if (Platform == Platform.Unspecified)
+        if (VideoPlatform == Platform.Unspecified)
             return (false, "Platform was unspecified");
 
         if (string.IsNullOrEmpty(PlaylistId))
@@ -71,7 +87,7 @@ public class PlaylistDownloadEntry : NotificationObject
         Regex rYoutubeEntry = new Regex(@"\S+youtube\..+\/playlist?.+list=(PL[a-zA-Z0-9]+)(&.+)?");
         if (rYoutubeEntry.IsMatch(playlistUrl))
         {
-            entry.Platform = Platform.YouTube;
+            entry.VideoPlatform = Platform.YouTube;
             entry.OutputDirectory = unformattedOutputDirectory;
             return entry;
         }

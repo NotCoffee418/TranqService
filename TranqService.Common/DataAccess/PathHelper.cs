@@ -46,11 +46,11 @@ public static class PathHelper
     }
 
     /// <summary>
-    /// E
+    /// Returns wildcard-processed and create it if needed
     /// </summary>
     /// <param name="wildcardDirectory"></param>
     /// <returns></returns>
-    public static string GetProcessedWildcardDirectory(string wildcardDirectory)
+    public static string GetProcessedWildcardDirectory(string wildcardDirectory, bool skipDirectoryCreate = false)
     {
         // Replace wildcards
         string processedDirectory = wildcardDirectory
@@ -61,7 +61,7 @@ public static class PathHelper
             processedDirectory = processedDirectory + Path.DirectorySeparatorChar;
 
         // Ensure directory exists
-        if (!Directory.Exists(processedDirectory))
+        if (!skipDirectoryCreate && !Directory.Exists(processedDirectory))
             Directory.CreateDirectory(processedDirectory);
 
         return processedDirectory;

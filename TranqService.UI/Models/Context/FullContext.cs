@@ -15,4 +15,10 @@ public class FullContext : NotificationObject
         get => Get<AdvancedOptionsContext>(nameof(AdvancedOptionsContext));
         set => Set(nameof(AdvancedOptionsContext), value);
     }
+
+    public PlaylistSetupContext PlaylistSetupContext
+    {
+        get => Get<PlaylistSetupContext>(nameof(PlaylistSetupContext));
+        set => Set(nameof(PlaylistSetupContext), value);
+    }
 }

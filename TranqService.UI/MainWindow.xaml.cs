@@ -15,6 +15,8 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using TranqService.Common.DataAccess;
 using TranqService.UI.Models.Context;
+using TranqService.Common.Data;
+using System.IO;
 
 namespace TranqService.UI
 {
@@ -32,6 +34,13 @@ namespace TranqService.UI
 
         public FullContext FullContext { get; set; }
 
+        // Binding enum manually because WPF doesn't like to play nice with me
+        public static List<DownloadFormat> DownloadFormatEnumData {
+            get => Enum.GetValues(typeof(DownloadFormat)).Cast<DownloadFormat>()
+                .Where(x => x > 0) // No Unspecified or dev items
+                .ToList();
+                //.Select(x => new ComboBoxItem() { Content = x }).ToList();
+        }
 
         private void InitContext()
         {
@@ -40,15 +49,13 @@ namespace TranqService.UI
             {
                 AdvancedOptionsContext = new(),
                 SetupContext = new(),
+                PlaylistSetupContext = new(),
             };
             DataContext = FullContext;
         }
         
-
-
         private void OpenDataDirectory_Click(object sender, RoutedEventArgs e)
             => Process.Start("explorer.exe", PathHelper.GetAppdataPath(false));
-
 
         private void SetupSave_Click(object sender, RoutedEventArgs e)
             => FullContext.SetupContext.Save();
@@ -68,5 +75,43 @@ namespace TranqService.UI
 
         private void GetYtApi_Click(object sender, RoutedEventArgs e)
             => Process.Start("explorer.exe", "https://console.cloud.google.com/apis/library/youtube.googleapis.com");
+
+        private void SelectPlaylistDirectory_Click(object sender, RoutedEventArgs e)
+        {
+            // Grab the relevant playlist entry from the button's tag
+            var playlistEntry = ((Button)sender).Tag as PlaylistDownloadEntry;
+
+            // Check if selected directory is valid and exists
+            string? processedKnownDir = null;
+            if (!string.IsNullOrEmpty(playlistEntry.OutputDirectory))
+            {
+                processedKnownDir = PathHelper.GetProcessedWildcardDirectory(playlistEntry.OutputDirectory, skipDirectoryCreate: true);
+                if (!Directory.Exists(processedKnownDir))
+                    processedKnownDir = null;
+            }
+
+            // Select ideal directory for the defined settings
+            string startingDir;
+            if (!string.IsNullOrEmpty(processedKnownDir))
+                startingDir = processedKnownDir;
+            else if (playlistEntry.OutputAs == DownloadFormat.Audio)
+                startingDir = Environment.GetFolderPath(Environment.SpecialFolder.MyMusic);
+            else if (playlistEntry.OutputAs == DownloadFormat.Video)
+                startingDir = Environment.GetFolderPath(Environment.SpecialFolder.MyVideos);
+            else startingDir = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+
+            // Request folder select
+            var fbd = new WinForms.FolderBrowserDialog()
+            {
+                SelectedPath = startingDir,
+                ShowNewFolderButton = true
+            };
+            WinForms.DialogResult result = fbd.ShowDialog();
+
+            // Update if selected
+            if (result == WinForms.DialogResult.OK)
+                playlistEntry.OutputDirectory = fbd.SelectedPath;
+            
+        }
     }
 }

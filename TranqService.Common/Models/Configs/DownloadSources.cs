@@ -3,5 +3,5 @@
 [ConfigFile("DownloadSources.json")]
 public class DownloadSources : ConfigBase<DownloadSources>
 {
-    public List<PlaylistDownloadEntry> PlaylistDownloadEntries { get; init; } = new();
+    public List<PlaylistDownloadEntry> PlaylistDownloadEntries { get; set; } = new();
 }

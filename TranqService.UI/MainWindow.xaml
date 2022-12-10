@@ -3,7 +3,9 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:System="clr-namespace:System;assembly=mscorlib"
         xmlns:local="clr-namespace:TranqService.UI"
+        xmlns:CommonData="clr-class:TranqService.Common.Data;assembly=TranqService.Common"
         mc:Ignorable="d"
         xmlns:ui="http://schemas.modernwpf.com/2019"
         ui:WindowHelper.UseModernWindowStyle="True"
@@ -11,17 +13,101 @@
         Title="MainWindow" Height="780" Width="978"
         Background="Black">
     <TabControl Grid.Column="1">
-        <TabItem Header="Playlists">
+        <TabItem Header="Playlists" DataContext="{Binding PlaylistSetupContext}">
 
             <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                <Grid Margin="20">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto" />
-                    </Grid.RowDefinitions>
+                <ItemsControl ItemsSource="{Binding PlaylistDownloadEntries}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel>
+                                <Border BorderThickness="2" BorderBrush="DimGray" Margin="10" Padding="10">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="150"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
 
-                </Grid>
+                                        <!-- Playlist Description -->
+                                        <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,5" Text="Playlist Name" VerticalAlignment="Center" />
+                                        <StackPanel 
+                                            Grid.Row="0" Grid.Column="1" Margin="0,5" 
+                                            Orientation="Horizontal">
+                                            <TextBlock Text="YT" Margin="0,0,5,0"/>
+                                            <TextBlock Text="(Loading...)"/>                                            
+                                        </StackPanel>
+                                        
+                                        <!-- Playlist Id -->
+                                        <TextBlock 
+                                            Grid.Row="1" Grid.Column="0" Margin="0,5"
+                                            VerticalAlignment="Center" 
+                                            Text="Playlist Id" />
+                                        <TextBox 
+                                            Grid.Row="1" Grid.Column="1" Margin="0,5" 
+                                                 Text="{Binding PlaylistId}" IsReadOnly="True"/>
+
+                                        <!-- Output Directory -->
+                                        <TextBlock 
+                                            Grid.Row="2" Grid.Column="0" Margin="0,5" 
+                                            VerticalAlignment="Center" 
+                                            Text="Save Directory" />
+                                        <StackPanel 
+                                            Grid.Row="2" Grid.Column="1" Margin="0,5" 
+                                            Orientation="Vertical">
+
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBox
+                                                    Grid.Column="0"
+                                                    Text="{Binding OutputDirectory}"/>
+                                                <Button Grid.Column="1" Margin="10,0,0,0"
+                                                    Content="Select Directory"
+                                                    Tag="{Binding Path=DataContext, RelativeSource={RelativeSource Self}}"
+                                                    Click="SelectPlaylistDirectory_Click" />
+                                            </Grid>
+                                            
+                                            <TextBlock FontSize="12" 
+                                                Text="Optional wildcards: {Year}">
+                                                <TextBlock.ToolTip>
+                                                    <ToolTip>
+                                                        <TextBlock>
+                                                            Wildcards can be used to programatically replace a part of the path with a programmatic variable.
+                                                            <LineBreak />For example 'C:\\{Year}' would be 
+                                                            <LineBreak />interpreted as 'C:\\2023'.
+                                                        </TextBlock>                                                        
+                                                    </ToolTip>
+                                                </TextBlock.ToolTip>
+                                            </TextBlock>
+                                        </StackPanel>
+                                        
+
+                                        <!-- Download format -->
+                                        <TextBlock 
+                                            Grid.Row="3" Grid.Column="0" Margin="0,5" 
+                                            VerticalAlignment="Center" 
+                                            Text="Format" />
+                                        <ComboBox 
+                                            Grid.Row="3" Grid.Column="1" Margin="0,5" 
+                                            ItemsSource="{Binding DownloadFormatEnumData, RelativeSource={RelativeSource AncestorType=local:MainWindow}}"
+                                            SelectedItem="{Binding OutputAs}" />
+                                        
+                                    </Grid>
+                                </Border>
+                            </StackPanel>                            
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
             </ScrollViewer>
         </TabItem>
 
