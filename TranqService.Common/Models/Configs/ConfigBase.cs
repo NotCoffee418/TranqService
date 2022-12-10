@@ -36,8 +36,16 @@ public abstract class ConfigBase<T>
             await SaveAsync();
 
         // Reload existing config file
-        string json = await File.ReadAllTextAsync(configPath);
-        instance = JsonSerializer.Deserialize<T>(json) ?? new T();
+        try
+        {
+            // Causes deadlock on async call, so.. just don't.
+            string json = File.ReadAllText(configPath);
+            instance = JsonSerializer.Deserialize<T>(json) ?? new T();
+        }
+        catch (Exception ex)
+        {
+            throw new Exception("There was an error parsing config file at '{configPath}'", ex);
+        }
         return instance;
     }
 
