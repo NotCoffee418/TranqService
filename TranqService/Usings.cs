@@ -21,3 +21,4 @@ global using TranqService.Database.Queries;
 global using TranqService.Common.Data;
 global using TranqService.Database.Models;
 global using TranqService.Common.DataAccess;
+global using TranqService.Common.Models.Configs;

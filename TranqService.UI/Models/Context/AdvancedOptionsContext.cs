@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-using TranqService.Common.Data;
+using TranqService.Common.Models.Configs;
 
 namespace TranqService.UI.Models.Context;
 
@@ -12,7 +12,7 @@ public class AdvancedOptionsContext : NotificationObject
     public AdvancedOptionsContext()
     {
         // Load known values from config
-        AppPaths.GetAppPathsAsync().ContinueWith(task =>
+        AppPaths.GetAsync().ContinueWith(task =>
         {
             AppPaths paths = task.Result;
             OverrideAppsettingsPath = paths.AppSettingsPath;
@@ -41,7 +41,7 @@ public class AdvancedOptionsContext : NotificationObject
     public void Save()
     {
         CanSave = false;
-        AppPaths.GetAppPathsAsync().ContinueWith(task =>
+        AppPaths.GetAsync().ContinueWith(task =>
         {
             // Load file first to ensure integrity of any other properties
             AppPaths paths = task.Result;
@@ -49,7 +49,7 @@ public class AdvancedOptionsContext : NotificationObject
             paths.DatabasePath = OverrideDatabasePath;
 
             // Update the file with the updated properties
-            paths.Save().ContinueWith(task =>
+            paths.SaveAsync().ContinueWith(task =>
             {
                 CanSave = true;
             });

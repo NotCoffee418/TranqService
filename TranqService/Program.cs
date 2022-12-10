@@ -1,29 +1,25 @@
-// Get appsettings path from commandline args
-int configPathKeyIndex = Array.IndexOf(args, "--configPath");
-if (configPathKeyIndex == -1 || configPathKeyIndex + 1 < args.Length - 1) 
-    throw new Exception("No config path specified.");
-string configPath = args[configPathKeyIndex + 1];
-
-// Access config manually for DI building
-IConfiguration configuration = new ConfigurationBuilder()
-        .AddJsonFile(configPath)
-        .Build();
-ulong discordWebhookId = Convert.ToUInt64(configuration["Config:DiscordWebhookId"]);
-string discordWebhookSecret = configuration["Config:DiscordWebhookSecret"];
+// Prepare configuration files
+AppPaths sessionAppPaths = await AppPaths.GetAsync();
+ApiKeys apiKeys = await ApiKeys.GetAsync();
 
 // Get log file path for this session
 string logFilePath = LogFileManager.CleanupAndGetNewLogFilePath();
 
 // init logger
-Log.Logger = new LoggerConfiguration()
+var loggerConfig = new LoggerConfiguration()
     .MinimumLevel.Information()
     .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
     .Enrich.FromLogContext()
     .WriteTo.Console(LogEventLevel.Information)
-    .WriteTo.File(logFilePath, LogEventLevel.Information)
-    .WriteTo.Discord(discordWebhookId, discordWebhookSecret, 
-        restrictedToMinimumLevel: LogEventLevel.Warning)
-    .CreateLogger();
+    .WriteTo.File(logFilePath, LogEventLevel.Debug);
+
+// Attempt to add discord logging
+if (apiKeys.DiscordWebhookId > 0 && !string.IsNullOrEmpty(apiKeys.DiscordWebhookSecret))
+    loggerConfig = loggerConfig
+        .WriteTo.Discord(apiKeys.DiscordWebhookId, apiKeys.DiscordWebhookSecret, 
+        restrictedToMinimumLevel: LogEventLevel.Warning);
+Log.Logger = loggerConfig.CreateLogger();
+
 
 // Init host
 IHost host = Host.CreateDefaultBuilder(args)
@@ -38,7 +34,6 @@ IHost host = Host.CreateDefaultBuilder(args)
     .UseServiceProviderFactory(new AutofacServiceProviderFactory())
     .ConfigureContainer<ContainerBuilder>(builder =>
     {
-        builder.RegisterInstance(configuration).As<IConfiguration>().SingleInstance();
         builder.ConfigureShared();
         builder.ConfigureDatabase();
         builder.ConfigureCommon();

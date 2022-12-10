@@ -13,3 +13,4 @@ global using System.Globalization;
 global using System.Text.RegularExpressions;
 global using System.Text.Json;
 global using TranqService.Common.DataAccess;
+global using TranqService.Common.Models.Configs;
