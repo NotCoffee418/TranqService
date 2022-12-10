@@ -1,5 +1,3 @@
-using TranqService.Shared.DataAccess.Ytdlp;
-
 namespace TranqService.Services;
 public class YoutubeDownloadService : BackgroundService
 {
@@ -7,7 +5,6 @@ public class YoutubeDownloadService : BackgroundService
     private readonly IPlaylistHelper _youtubeSaveHelper;
     private readonly IYoutubeVideoInfoQueries _youtubeQueries;
     private readonly IYtdlpUpdater _ytdlpUpdater;
-    private readonly IConfig _config;
     private readonly IYtdlpInterop _ytdlp;
 
     public YoutubeDownloadService(
@@ -15,14 +12,12 @@ public class YoutubeDownloadService : BackgroundService
         IPlaylistHelper youtubeSaveHelper,
         IYoutubeVideoInfoQueries youtubeQueries,
         IYtdlpUpdater ytdlpUpdater,
-        IConfig config,
         IYtdlpInterop ytdlp)
     {
         _logger = logger;
         _youtubeSaveHelper = youtubeSaveHelper;
         _youtubeQueries = youtubeQueries;
         _ytdlpUpdater = ytdlpUpdater;
-        _config = config;
         _ytdlp = ytdlp;
     }
 
@@ -47,57 +42,30 @@ public class YoutubeDownloadService : BackgroundService
     }
 
     private async Task ProcessAllPlaylists(CancellationToken stoppingToken)
-    {
-        // Converts paths with variables to actual paths and creates missing paths
-        Func<string, string> preparedOutputDir = (string inputPath) =>
-        {
-            // Replace variables
-            string outputPath = inputPath
-                .Replace("{Year}", DateTime.UtcNow.Year.ToString());
-
-            // Ensure trailing slash depending on OS
-            if (!outputPath.EndsWith(Path.DirectorySeparatorChar))
-                outputPath = outputPath + Path.DirectorySeparatorChar;
-
-            // Create missing directories
-            if (!Directory.Exists(outputPath))
-                Directory.CreateDirectory(outputPath);
-
-            return outputPath;
-        };
+    {        
+        // Get all playlists to process
+        List<PlaylistDownloadEntry> validPlaylists = (await DownloadSources.GetAsync())
+            .PlaylistDownloadEntries
+            .FindAll(x => x.Validate().IsValid);
 
         // Video playlists
-        foreach (var kvp in _config.YoutubeVideoPlaylists)
+        foreach (var plEntry in validPlaylists)
         {
-            string playlistGuid = kvp.Key;
-            string outputDir = kvp.Value;
-
-            // Populate queue with tasks
-            List<YoutubeVideoInfo> videoToDownload =
-                await _youtubeSaveHelper.GetUndownloadedVideosAsync(playlistGuid);
-
-            await ProcessPlaylistAsync(
-                videoToDownload,
-                preparedOutputDir(outputDir),
-                "mp4",
-                stoppingToken);
-        }
-
-        // Music playlists
-        foreach (var kvp in _config.YoutubeMusicPlaylists)
-        {
-            string playlistGuid = kvp.Key;
-            string outputDir = kvp.Value;
+            string formatString = plEntry.OutputAs switch
+            {
+                DownloadFormat.Audio => "mp3",
+                DownloadFormat.Video => "mp4",
+                _ => throw new ArgumentException("Impossible, download format error")
+            };
 
             // Populate queue with tasks
             List<YoutubeVideoInfo> videosToDownload =
-                await _youtubeSaveHelper.GetUndownloadedVideosAsync(playlistGuid);
+                await _youtubeSaveHelper.GetUndownloadedVideosAsync(plEntry.PlaylistId);
 
-            // Run task
             await ProcessPlaylistAsync(
                 videosToDownload,
-                preparedOutputDir(outputDir),
-                "mp3",
+                PathHelper.GetProcessedWildcardDirectory(plEntry.OutputDirectory),
+                formatString,
                 stoppingToken);
         }
     }

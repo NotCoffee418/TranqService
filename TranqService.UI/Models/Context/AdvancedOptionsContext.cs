@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using TranqService.Common.Abstract;
 using TranqService.Common.Models.Configs;
 
 namespace TranqService.UI.Models.Context;

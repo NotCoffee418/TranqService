@@ -1,9 +1,9 @@
-﻿namespace TranqService.UI.Abstract;
+﻿namespace TranqService.Common.Abstract;
 
 public abstract class NotificationObject : INotifyPropertyChanged
 {
     private ConcurrentDictionary<string, object?> FieldData = new();
-    
+
     public event PropertyChangedEventHandler? PropertyChanged;
 
     protected void RaisePropertyChanged<T>(Expression<Func<T>> me)
@@ -31,7 +31,7 @@ public abstract class NotificationObject : INotifyPropertyChanged
     /// <typeparam name="T"></typeparam>
     /// <param name="propertyName"></param>
     /// <returns></returns>
-    protected T? Get<T>(string propertyName, T overrideDefault = default(T))
-        => FieldData.TryGetValue(propertyName, out var data) 
+    protected T? Get<T>(string propertyName, T overrideDefault = default)
+        => FieldData.TryGetValue(propertyName, out var data)
         ? (T?)data : overrideDefault;
 }

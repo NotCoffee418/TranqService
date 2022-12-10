@@ -14,3 +14,8 @@ global using System.Text.RegularExpressions;
 global using System.Text.Json;
 global using TranqService.Common.DataAccess;
 global using TranqService.Common.Models.Configs;
+global using static TranqService.Common.Data.Enums;
+global using TranqService.Common.Abstract;
+global using System.Collections.Concurrent;
+global using System.ComponentModel;
+global using System.Linq.Expressions;

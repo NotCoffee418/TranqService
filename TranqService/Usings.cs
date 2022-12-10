@@ -22,3 +22,6 @@ global using TranqService.Common.Data;
 global using TranqService.Database.Models;
 global using TranqService.Common.DataAccess;
 global using TranqService.Common.Models.Configs;
+global using TranqService.Common.Models;
+global using TranqService.Shared.DataAccess.Ytdlp;
+global using static TranqService.Common.Data.Enums;

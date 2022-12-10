@@ -1,4 +1,6 @@
-﻿namespace TranqService.UI.Models.Context;
+﻿using TranqService.Common.Abstract;
+
+namespace TranqService.UI.Models.Context;
 
 public class FullContext : NotificationObject
 {

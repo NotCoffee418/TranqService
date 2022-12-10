@@ -44,4 +44,26 @@ public static class PathHelper
         // Determine config file location
         return Path.Combine(AppPaths.Get().AppSettingsDir, configFileName);
     }
+
+    /// <summary>
+    /// E
+    /// </summary>
+    /// <param name="wildcardDirectory"></param>
+    /// <returns></returns>
+    public static string GetProcessedWildcardDirectory(string wildcardDirectory)
+    {
+        // Replace wildcards
+        string processedDirectory = wildcardDirectory
+                .Replace("{Year}", DateTime.UtcNow.Year.ToString());
+
+        // Ensure trailing slash depending on OS
+        if (!processedDirectory.EndsWith(Path.DirectorySeparatorChar))
+            processedDirectory = processedDirectory + Path.DirectorySeparatorChar;
+
+        // Ensure directory exists
+        if (!Directory.Exists(processedDirectory))
+            Directory.CreateDirectory(processedDirectory);
+
+        return processedDirectory;
+    }
 }
