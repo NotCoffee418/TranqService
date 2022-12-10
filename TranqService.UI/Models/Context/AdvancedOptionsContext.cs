@@ -15,8 +15,8 @@ public class AdvancedOptionsContext : NotificationObject
         AppPaths.GetAsync().ContinueWith(task =>
         {
             AppPaths paths = task.Result;
-            OverrideAppsettingsPath = paths.AppSettingsPath;
-            OverrideDatabasePath = paths.DatabasePath;
+            OverrideConfigDir = paths.AppSettingsDir;
+            OverrideDatabasePath = paths.DatabaseFile;
         });
     }
 
@@ -26,10 +26,10 @@ public class AdvancedOptionsContext : NotificationObject
         set => Set(nameof(CanSave), value);
     }
 
-    public string OverrideAppsettingsPath
+    public string OverrideConfigDir
     {
-        get => Get<string>(nameof(OverrideAppsettingsPath));
-        set => Set(nameof(OverrideAppsettingsPath), value);
+        get => Get<string>(nameof(OverrideConfigDir));
+        set => Set(nameof(OverrideConfigDir), value);
     }
     
     public string OverrideDatabasePath
@@ -45,8 +45,8 @@ public class AdvancedOptionsContext : NotificationObject
         {
             // Load file first to ensure integrity of any other properties
             AppPaths paths = task.Result;
-            paths.AppSettingsPath = OverrideAppsettingsPath;
-            paths.DatabasePath = OverrideDatabasePath;
+            paths.AppSettingsDir = OverrideConfigDir;
+            paths.DatabaseFile = OverrideDatabasePath;
 
             // Update the file with the updated properties
             paths.SaveAsync().ContinueWith(task =>

@@ -21,7 +21,7 @@ public class TranqDbContext : DbContext
     
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        optionsBuilder.UseSqlite("Data Source=" + AppPaths.Get().DatabasePath);
+        optionsBuilder.UseSqlite("Data Source=" + AppPaths.Get().DatabaseFile);
     }
 
 }

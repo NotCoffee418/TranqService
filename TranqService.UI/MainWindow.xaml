@@ -22,11 +22,15 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
-                <GroupBox Header="Override appsettings Path" Grid.Row="0">
-                    <TextBox 
-                        Text="{Binding OverrideAppsettingsPath}" 
-                        Margin="10"
-                        HorizontalAlignment="Stretch"/>
+                <GroupBox Header="Override Config Directory" Grid.Row="0">
+                    <StackPanel Orientation="Vertical">                        
+                        <TextBlock Margin="10,0" Text="Directory where config files will be located. Config files must be manually moved to this directory if this is modified."/>
+                        <TextBox 
+                            Text="{Binding OverrideConfigDir}" 
+                            Margin="10"
+                            HorizontalAlignment="Stretch"/>
+                    </StackPanel>
+                    
                 </GroupBox>
                 <GroupBox Header="Override Database Path" Grid.Row="1">
                     <TextBox 

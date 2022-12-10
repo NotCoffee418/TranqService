@@ -1,6 +1,4 @@
-﻿using TranqService.Common.Data;
-
-namespace TranqService.Common.Attributes;
+﻿namespace TranqService.Common.Attributes;
 
 internal class ConfigFileAttribute : Attribute
 {
@@ -8,12 +6,15 @@ internal class ConfigFileAttribute : Attribute
     /// Specifies which config file to use for the implementing class
     /// </summary>
     /// <param name="configFileName">Only filename or path inside of appdata/local/tranqservice</param>
-    public ConfigFileAttribute(string configFileName)
+    /// <param name="forceRootLocalAppData">Force config file from appsettings. Used by AppPaths as it would contradict otherwise.</param>
+    public ConfigFileAttribute(string configFileName, bool forceRootLocalAppData = false)
 	{
-        ConfigFilePath = PathHelper.GetAppdataPath(true, configFileName);
-	}
+        ConfigFileName = configFileName;
+        ForceRootLocalAppData = forceRootLocalAppData;
+    }
 
-    private string ConfigFilePath { get; init; }
+    public string ConfigFileName { get; }
+    public bool ForceRootLocalAppData { get; }
 
     /// <summary>
     /// Extract full path from the attribute
@@ -30,6 +31,7 @@ internal class ConfigFileAttribute : Attribute
             throw new Exception("Config file attribute not found for type " + typeof(T).Name);
 
         // Extract it
-        return (attributes[0] as ConfigFileAttribute).ConfigFilePath;
+        ConfigFileAttribute attr = attributes[0] as ConfigFileAttribute;
+        return PathHelper.GetConfigFilePath(attr.ConfigFileName, attr.ForceRootLocalAppData);
     }
 }

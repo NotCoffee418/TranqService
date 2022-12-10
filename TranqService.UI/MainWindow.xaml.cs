@@ -39,8 +39,18 @@ namespace TranqService.UI
             };
             DataContext = FullContext;
         }
-
+        
         private void AdvancedSettingsSave_Click(object sender, RoutedEventArgs e)
-            => FullContext.AdvancedOptionsContext.Save();
+        {
+            MessageBoxResult confirmation = MessageBox.Show(
+                "Touching these settings can break the app. " + Environment.NewLine + 
+                "Are you sure you want to save advanced settings?",
+                "Save Advanced Settings",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning,
+                MessageBoxResult.No);
+            if (confirmation == MessageBoxResult.Yes)
+                FullContext.AdvancedOptionsContext.Save();
+        }
     }
 }

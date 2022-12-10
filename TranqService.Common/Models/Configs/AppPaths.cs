@@ -3,22 +3,22 @@
 /// <summary>
 /// Defines important paths for the application, can be overwritten by overrides.json
 /// </summary>
-[ConfigFile("AppPaths.json")]
+[ConfigFile("AppPaths.json", forceRootLocalAppData: true)]
 public class AppPaths : ConfigBase<AppPaths>
 {
     // -- Define default paths
-    private string appSettingsPath = PathHelper.GetAppdataPath(true, "appsettings.json");
+    private string appSettingsDir = PathHelper.GetAppdataPath(false, "config");
     private string databasePath = PathHelper.GetAppdataPath(true, "TranqService.sqlite");
 
 
     // -- Properties
-    public string AppSettingsPath
+    public string AppSettingsDir
     {
-        get => appSettingsPath;
-        set => appSettingsPath = value;
+        get => appSettingsDir;
+        set => appSettingsDir = value;
     }
 
-    public string DatabasePath
+    public string DatabaseFile
     {
         get => databasePath;
         set => databasePath = value;

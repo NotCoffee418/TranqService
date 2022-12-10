@@ -28,4 +28,20 @@ public static class PathHelper
         // Return final desired path
         return fullPath;
     }
+
+    /// <summary>
+    /// Get path to a config file respecting override settings.
+    /// </summary>
+    /// <param name="configFileName"></param>
+    /// <param name="forceRootLocalAppData">Reads config file from GetAppdataPath regardless of any override settings</param>
+    /// <returns></returns>
+    public static string GetConfigFilePath(string configFileName, bool forceRootLocalAppData = false)
+    {
+        // Load configs with forced location in appdata
+        if (forceRootLocalAppData) 
+            return GetAppdataPath(true, configFileName);
+
+        // Determine config file location
+        return Path.Combine(AppPaths.Get().AppSettingsDir, configFileName);
+    }
 }
