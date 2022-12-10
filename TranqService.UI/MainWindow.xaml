@@ -12,9 +12,83 @@
         Background="Black">
     <TabControl Grid.Column="1">
         <TabItem Header="Playlists">
-            <Grid >
-            </Grid>
+
+            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                <Grid Margin="20">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                </Grid>
+            </ScrollViewer>
         </TabItem>
+
+        <TabItem Header="Setup" DataContext="{Binding SetupContext}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <Grid Margin="20">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Required" Margin="0,0" FontSize="32" Foreground="LightSlateGray" />
+                        <GroupBox Grid.Row="1" Header="YouTube API Key" >
+                            <StackPanel Orientation="Vertical">
+                                <TextBlock Margin="10,0" ClipToBounds="False" Text="This key is (for now) still required to use the service."/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox 
+                                        Grid.Column="0"
+                                        Text="{Binding YoutubeApiKey}" 
+                                        Margin="10"
+                                        HorizontalAlignment="Stretch"/>
+                                    <Button 
+                                        Grid.Column="1"
+                                        Content="Get API Key"
+                                        Click="GetYtApi_Click"/>
+                                </Grid>
+                                
+                            </StackPanel>
+                        </GroupBox>
+
+
+
+                        <Separator Grid.Row="2" Margin="-20,0" />
+                        <TextBlock Grid.Row="3" Text="Optional" Margin="16,16,0,0" FontSize="32" Foreground="LightSlateGray" />
+
+                    </Grid>
+                </ScrollViewer>
+                <Button 
+                    Background="DarkGreen" 
+                    Width="128"
+                    Padding="10"
+                    Margin="30,10,0,20"
+                    Grid.Row="1" 
+                    Grid.Column="1" 
+                    Content="Save" 
+                    IsEnabled="{Binding CanSave}" 
+                    Click="SetupSave_Click" />
+
+            </Grid>
+            
+        </TabItem>
+        
         <TabItem Header="Advanced" DataContext="{Binding AdvancedOptionsContext}">
             <Grid Margin="20">
                 <Grid.RowDefinitions>
@@ -31,7 +105,6 @@
                             Margin="10"
                             HorizontalAlignment="Stretch"/>
                     </StackPanel>
-
                 </GroupBox>
                 <GroupBox Header="Override Database Path" Grid.Row="1">
                     <StackPanel Orientation="Vertical">
@@ -42,7 +115,7 @@
                             HorizontalAlignment="Stretch"/>
                     </StackPanel>
                 </GroupBox>
-                <Button Content="Save" IsEnabled="{Binding CanSave}" Grid.Row="2" Padding="10" Click="AdvancedSettingsSave_Click" />
+                <Button Content="Save" IsEnabled="{Binding CanSave}" Grid.Row="2" Width="128" Padding="10" Background="DarkGreen" Click="AdvancedSettingsSave_Click" />
                 <Button Content="Open data directory" Grid.Row="3" Margin="0,0,32,32" VerticalAlignment="Bottom" HorizontalAlignment="Right" Click="OpenDataDirectory_Click"/>
             </Grid>
         </TabItem>

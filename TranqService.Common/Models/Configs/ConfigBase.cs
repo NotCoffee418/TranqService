@@ -14,8 +14,15 @@ public abstract class ConfigBase<T>
     /// Gets (and creates) the instance of the config (async)
     /// </summary>
     /// <returns></returns>
-    public static async Task<T> GetAsync() 
-        => instance is null ? await (new T() as ConfigBase<T>).ReloadInstanceAsync() : instance;
+    public static async Task<T> GetAsync()
+    {
+        if (instance is null)
+        {
+            instance = new T();
+            await (instance as ConfigBase<T>).ReloadInstanceAsync();
+        }
+        return instance;
+    }
 
     /// <summary>
     /// Load important paths from the json file or use valid defaults.

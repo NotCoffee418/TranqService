@@ -35,17 +35,28 @@ namespace TranqService.UI
 
         private void InitContext()
         {
+            
             FullContext = new()
             {
-                AdvancedOptionsContext = new()
+                AdvancedOptionsContext = new(),
+                SetupContext = new(),
             };
             DataContext = FullContext;
         }
         
+
+
+        private void OpenDataDirectory_Click(object sender, RoutedEventArgs e)
+            => Process.Start("explorer.exe", PathHelper.GetAppdataPath(false));
+
+
+        private void SetupSave_Click(object sender, RoutedEventArgs e)
+            => FullContext.SetupContext.Save();
+        
         private void AdvancedSettingsSave_Click(object sender, RoutedEventArgs e)
         {
             MessageBoxResult confirmation = MessageBox.Show(
-                "Touching these settings can break the app. " + Environment.NewLine + 
+                "Touching these settings can break the app. " + Environment.NewLine +
                 "Are you sure you want to save advanced settings?",
                 "Save Advanced Settings",
                 MessageBoxButton.YesNo,
@@ -55,8 +66,7 @@ namespace TranqService.UI
                 FullContext.AdvancedOptionsContext.Save();
         }
 
-        
-        private void OpenDataDirectory_Click(object sender, RoutedEventArgs e)
-            => Process.Start("explorer.exe", PathHelper.GetAppdataPath(false))
+        private void GetYtApi_Click(object sender, RoutedEventArgs e)
+            => Process.Start("explorer.exe", "https://console.cloud.google.com/apis/library/youtube.googleapis.com");
     }
 }
