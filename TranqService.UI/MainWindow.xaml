@@ -8,7 +8,7 @@
         xmlns:ui="http://schemas.modernwpf.com/2019"
         ui:WindowHelper.UseModernWindowStyle="True"
         ui:ThemeManager.IsThemeAware="True"
-        Title="MainWindow" Height="513" Width="912"
+        Title="MainWindow" Height="780" Width="978"
         Background="Black">
     <TabControl Grid.Column="1">
         <TabItem Header="Playlists">
@@ -38,13 +38,15 @@
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        
-                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Required" Margin="0,0" FontSize="32" Foreground="LightSlateGray" />
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Required" FontSize="32" Foreground="LightSlateGray" />
                         <GroupBox Grid.Row="1" Header="YouTube API Key" >
                             <StackPanel Orientation="Vertical">
                                 <TextBlock Margin="10,0" ClipToBounds="False" Text="This key is (for now) still required to use the service."/>
@@ -63,15 +65,50 @@
                                         Content="Get API Key"
                                         Click="GetYtApi_Click"/>
                                 </Grid>
-                                
+
                             </StackPanel>
                         </GroupBox>
 
-
-
                         <Separator Grid.Row="2" Margin="-20,0" />
-                        <TextBlock Grid.Row="3" Text="Optional" Margin="16,16,0,0" FontSize="32" Foreground="LightSlateGray" />
 
+                        <TextBlock Grid.Row="3" Text="Optional" FontSize="32" Foreground="LightSlateGray" />
+                        <GroupBox Header="Discord Logging" Grid.Row="4">
+                            <StackPanel Orientation="Vertical">
+                                <TextBlock Margin="10,0" Text="Optionally send warnings and errors to a discord server using webhooks."/>
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="250" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBlock 
+                                        Grid.Row="0" Grid.Column="0" 
+                                        VerticalAlignment="Center" FontSize="18" 
+                                        Text="Webhook Id"/>
+                                    <TextBox 
+                                        Grid.Row="0"
+                                        Grid.Column="1"
+                                        Text="{Binding DiscordWebhookId}" 
+                                        Margin="10"
+                                        HorizontalAlignment="Stretch"/>
+
+                                    <TextBlock 
+                                        Grid.Row="1" Grid.Column="0" 
+                                        VerticalAlignment="Center" FontSize="18" 
+                                        Text="Webhook Secret"/>
+                                    <TextBox 
+                                        Grid.Row="1"
+                                        Grid.Column="1"
+                                        Text="{Binding DiscordWebhookSecret}" 
+                                        Margin="10"
+                                        HorizontalAlignment="Stretch"/>
+                                </Grid>
+                            </StackPanel>
+                        </GroupBox>
                     </Grid>
                 </ScrollViewer>
                 <Button 
@@ -86,9 +123,9 @@
                     Click="SetupSave_Click" />
 
             </Grid>
-            
+
         </TabItem>
-        
+
         <TabItem Header="Advanced" DataContext="{Binding AdvancedOptionsContext}">
             <Grid Margin="20">
                 <Grid.RowDefinitions>
