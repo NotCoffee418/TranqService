@@ -59,7 +59,10 @@ namespace TranqService.UI
 
         private void SetupSave_Click(object sender, RoutedEventArgs e)
             => FullContext.SetupContext.Save();
+        private void DownloadSourcesSave_Click(object sender, RoutedEventArgs e)
+            => FullContext.PlaylistSetupContext.Save();
         
+
         private void AdvancedSettingsSave_Click(object sender, RoutedEventArgs e)
         {
             MessageBoxResult confirmation = MessageBox.Show(

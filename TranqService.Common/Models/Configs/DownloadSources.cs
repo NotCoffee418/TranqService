@@ -4,4 +4,5 @@
 public class DownloadSources : ConfigBase<DownloadSources>
 {
     public List<PlaylistDownloadEntry> PlaylistDownloadEntries { get; set; } = new();
+
 }

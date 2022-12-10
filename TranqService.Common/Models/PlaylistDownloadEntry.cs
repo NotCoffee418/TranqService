@@ -37,6 +37,15 @@ public class PlaylistDownloadEntry : NotificationObject
         get => Get<string>(nameof(OutputDirectory));
         set => Set(nameof(OutputDirectory), value);
     }
+    
+    /// <summary>
+    /// Wildcards ok. Directory does not need to exist yet.
+    /// </summary>
+    public DateTime DateAdded
+    {
+        get => Get<DateTime>(nameof(DateAdded), DateTime.UtcNow);
+        set => Set(nameof(DateAdded), value);
+    }
 
     /// <summary>
     /// Check if the config has any obvious errors. 

@@ -14,101 +14,116 @@
         Background="Black">
     <TabControl Grid.Column="1">
         <TabItem Header="Playlists" DataContext="{Binding PlaylistSetupContext}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <ItemsControl ItemsSource="{Binding PlaylistDownloadEntries}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel>
+                                    <Border BorderThickness="2" BorderBrush="DimGray" Margin="10" Padding="10">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="150"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
 
-            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                <ItemsControl ItemsSource="{Binding PlaylistDownloadEntries}">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <StackPanel>
-                                <Border BorderThickness="2" BorderBrush="DimGray" Margin="10" Padding="10">
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="150"/>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                        </Grid.RowDefinitions>
-
-                                        <!-- Playlist Description -->
-                                        <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,5" Text="Playlist Name" VerticalAlignment="Center" />
-                                        <StackPanel 
+                                            <!-- Playlist Description -->
+                                            <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,5" Text="Playlist Name" VerticalAlignment="Center" />
+                                            <StackPanel 
                                             Grid.Row="0" Grid.Column="1" Margin="0,5" 
                                             Orientation="Horizontal">
-                                            <TextBlock Text="YT" Margin="0,0,5,0"/>
-                                            <TextBlock Text="(Loading...)"/>                                            
-                                        </StackPanel>
-                                        
-                                        <!-- Playlist Id -->
-                                        <TextBlock 
+                                                <TextBlock Text="YT" Margin="0,0,5,0"/>
+                                                <TextBlock Text="(Loading...)"/>
+                                            </StackPanel>
+
+                                            <!-- Playlist Id -->
+                                            <TextBlock 
                                             Grid.Row="1" Grid.Column="0" Margin="0,5"
                                             VerticalAlignment="Center" 
                                             Text="Playlist Id" />
-                                        <TextBox 
+                                            <TextBox 
                                             Grid.Row="1" Grid.Column="1" Margin="0,5" 
                                                  Text="{Binding PlaylistId}" IsReadOnly="True"/>
 
-                                        <!-- Output Directory -->
-                                        <TextBlock 
+                                            <!-- Output Directory -->
+                                            <TextBlock 
                                             Grid.Row="2" Grid.Column="0" Margin="0,5" 
                                             VerticalAlignment="Center" 
                                             Text="Save Directory" />
-                                        <StackPanel 
+                                            <StackPanel 
                                             Grid.Row="2" Grid.Column="1" Margin="0,5" 
                                             Orientation="Vertical">
 
-                                            <Grid>
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*"/>
-                                                    <ColumnDefinition Width="Auto"/>
-                                                </Grid.ColumnDefinitions>
-                                                <TextBox
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBox
                                                     Grid.Column="0"
                                                     Text="{Binding OutputDirectory}"/>
-                                                <Button Grid.Column="1" Margin="10,0,0,0"
+                                                    <Button Grid.Column="1" Margin="10,0,0,0"
                                                     Content="Select Directory"
                                                     Tag="{Binding Path=DataContext, RelativeSource={RelativeSource Self}}"
                                                     Click="SelectPlaylistDirectory_Click" />
-                                            </Grid>
-                                            
-                                            <TextBlock FontSize="12" 
+                                                </Grid>
+
+                                                <TextBlock FontSize="12" 
                                                 Text="Optional wildcards: {Year}">
-                                                <TextBlock.ToolTip>
-                                                    <ToolTip>
-                                                        <TextBlock>
+                                                    <TextBlock.ToolTip>
+                                                        <ToolTip>
+                                                            <TextBlock>
                                                             Wildcards can be used to programatically replace a part of the path with a programmatic variable.
                                                             <LineBreak />For example 'C:\\{Year}' would be 
                                                             <LineBreak />interpreted as 'C:\\2023'.
-                                                        </TextBlock>                                                        
-                                                    </ToolTip>
-                                                </TextBlock.ToolTip>
+                                                            </TextBlock>
+                                                        </ToolTip>
+                                                    </TextBlock.ToolTip>
                                             </TextBlock>
-                                        </StackPanel>
-                                        
+                                            </StackPanel>
 
-                                        <!-- Download format -->
-                                        <TextBlock 
+
+                                            <!-- Download format -->
+                                            <TextBlock 
                                             Grid.Row="3" Grid.Column="0" Margin="0,5" 
                                             VerticalAlignment="Center" 
                                             Text="Format" />
-                                        <ComboBox 
+                                            <ComboBox 
                                             Grid.Row="3" Grid.Column="1" Margin="0,5" 
                                             ItemsSource="{Binding DownloadFormatEnumData, RelativeSource={RelativeSource AncestorType=local:MainWindow}}"
                                             SelectedItem="{Binding OutputAs}" />
-                                        
-                                    </Grid>
-                                </Border>
-                            </StackPanel>                            
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-            </ScrollViewer>
+
+                                        </Grid>
+                                    </Border>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+                <Button 
+                    Background="DarkGreen" 
+                    Width="128"
+                    Padding="10"
+                    Margin="30,10,0,20"
+                    Grid.Row="1" 
+                    Grid.Column="1" 
+                    Content="Save" 
+                    IsEnabled="{Binding CanSave}" 
+                    Click="DownloadSourcesSave_Click" />
+            </Grid>
         </TabItem>
 
         <TabItem Header="Setup" DataContext="{Binding SetupContext}">

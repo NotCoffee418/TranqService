@@ -1,5 +1,6 @@
 ﻿using System.Windows.Controls;
 using System.Windows;
+using System.Linq;
 
 namespace TranqService.UI.Models.Context;
 
@@ -7,19 +8,7 @@ public class PlaylistSetupContext : NotificationObject
 {
     public PlaylistSetupContext()
     {
-        DownloadSources.Get();
-        PlaylistDownloadEntries = // playlistEntry.OutputDirectory = fbd.SelectedPath;
-
-        // test entries
-        new List<PlaylistDownloadEntry>() {
-            new()
-            {
-                OutputAs = DownloadFormat.Audio,
-                OutputDirectory = "C:\\Users\\username\\Downloads\\TranqService\\",
-                VideoPlatform = Platform.YouTube,
-                PlaylistId = "owo"
-            }
-        };
+        DownloadSourcesConfig = DownloadSources.Get();
     }
 
     public DownloadSources DownloadSourcesConfig
@@ -29,17 +18,39 @@ public class PlaylistSetupContext : NotificationObject
     }
 
 
+    public bool CanSave
+    {
+        get => Get<bool>(nameof(CanSave), overrideDefault: true);
+        set => Set(nameof(CanSave), value);
+    }
+    
+    public void Save()
+    {
+        CanSave = false;
+        DownloadSources.GetAsync().ContinueWith(task =>
+        {
+            // Load file first to ensure integrity of any other properties
+            DownloadSources dlSrcs = task.Result;
+            dlSrcs.PlaylistDownloadEntries = DownloadSourcesConfig.PlaylistDownloadEntries
+                .OrderByDescending(x => x.DateAdded)
+                .DistinctBy(x => new { x.PlaylistId, x.VideoPlatform, x.OutputAs})
+                .ToList();
+
+            // Update the file with the updated properties
+            dlSrcs.SaveAsync().ContinueWith(task =>
+            {
+                CanSave = true;
+            });
+        });
+    }
+
+
     // This black magic is required for WPF bindings
     public IEnumerable<PlaylistDownloadEntry> PlaylistDownloadEntries
     {
-        get => Get<List<PlaylistDownloadEntry>>(nameof(PlaylistDownloadEntries ));
-        set => Set(nameof(PlaylistDownloadEntries), value);
+        get => DownloadSourcesConfig.PlaylistDownloadEntries;
+        set => DownloadSourcesConfig.PlaylistDownloadEntries = value is null ? null : value.ToList();
     }
-    
-    //{
-    //    get => DownloadSourcesConfig.PlaylistDownloadEntries;
-    //    set => DownloadSourcesConfig.PlaylistDownloadEntries = value.ToList();
-    //}
 
     public static readonly DependencyProperty PlaylistDownloadEntriesProperty =
         DependencyProperty.Register(
