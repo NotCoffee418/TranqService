@@ -10,12 +10,32 @@
         ui:ThemeManager.IsThemeAware="True"
         Title="MainWindow" Height="450" Width="800"
         Background="Black">
-    <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="119*"/>
-            <ColumnDefinition Width="681*"/>
-        </Grid.ColumnDefinitions>
-        <Button Content="Button" Margin="100,81,0,0" VerticalAlignment="Top" Width="100" Grid.ColumnSpan="2"/>
-
-    </Grid>
+    <TabControl Grid.Column="1">
+        <TabItem Header="Playlists">
+            <Grid >
+            </Grid>
+        </TabItem>
+        <TabItem Header="Advanced" DataContext="{Binding AdvancedOptionsContext}">
+            <Grid Margin="20">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <GroupBox Header="Override appsettings Path" Grid.Row="0">
+                    <TextBox 
+                        Text="{Binding OverrideAppsettingsPath}" 
+                        Margin="10"
+                        HorizontalAlignment="Stretch"/>
+                </GroupBox>
+                <GroupBox Header="Override Database Path" Grid.Row="1">
+                    <TextBox 
+                        Text="{Binding OverrideDatabasePath}"
+                        Margin="10"
+                        HorizontalAlignment="Stretch"/>
+                </GroupBox>
+                <Button Content="Save" IsEnabled="{Binding CanSave}" Grid.Row="2" Padding="10" Click="AdvancedSettingsSave_Click" />
+            </Grid>
+        </TabItem>
+    </TabControl>
 </Window>

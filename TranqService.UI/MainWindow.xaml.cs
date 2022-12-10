@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using TranqService.UI.Models.Context;
 
 namespace TranqService.UI
 {
@@ -22,7 +23,24 @@ namespace TranqService.UI
     {
         public MainWindow()
         {
+            InitContext();
             InitializeComponent();
         }
+
+
+        public FullContext FullContext { get; set; }
+
+
+        private void InitContext()
+        {
+            FullContext = new()
+            {
+                AdvancedOptionsContext = new()
+            };
+            DataContext = FullContext;
+        }
+
+        private void AdvancedSettingsSave_Click(object sender, RoutedEventArgs e)
+            => FullContext.AdvancedOptionsContext.Save();
     }
 }

@@ -11,3 +11,5 @@ global using TranqService.Common.Attributes;
 global using static TranqService.Common.Attributes.DependencyScopeAttribute;
 global using System.Globalization;
 global using System.Text.RegularExpressions;
+global using System.Text.Json;
+global using TranqService.Common.DataAccess;
