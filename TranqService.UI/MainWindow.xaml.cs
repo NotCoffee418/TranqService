@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,6 +13,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using TranqService.Common.DataAccess;
 using TranqService.UI.Models.Context;
 
 namespace TranqService.UI
@@ -52,5 +54,9 @@ namespace TranqService.UI
             if (confirmation == MessageBoxResult.Yes)
                 FullContext.AdvancedOptionsContext.Save();
         }
+
+        
+        private void OpenDataDirectory_Click(object sender, RoutedEventArgs e)
+            => Process.Start("explorer.exe", PathHelper.GetAppdataPath(false))
     }
 }
