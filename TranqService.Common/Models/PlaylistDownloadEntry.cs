@@ -101,12 +101,12 @@ public class PlaylistDownloadEntry : NotificationObject
 
         // Try youtube
         // Finds: https://youtube.com/playlist?list=PLRESTOFTHEID&somethingsomething
-        Regex rYoutubeEntry = new Regex(@"\S+youtube\..+\/playlist?.+list=(PL[a-zA-Z0-9]+)(&.+)?");
+        Regex rYoutubeEntry = new Regex(@"(\S+youtu.+\/playlist?.+list=)?(PL[a-zA-Z0-9\-_]+)(&.+)?");
         if (rYoutubeEntry.IsMatch(playlistUrl))
         {
             entry.VideoPlatform = Platform.YouTube;
             entry.OutputDirectory = unformattedOutputDirectory;
-            entry.PlaylistId = rYoutubeEntry.Match(playlistUrl).Groups[1].Value;
+            entry.PlaylistId = rYoutubeEntry.Match(playlistUrl).Groups[2].Value;
             return entry;
         }
 
