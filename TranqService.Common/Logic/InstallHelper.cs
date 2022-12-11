@@ -8,10 +8,12 @@ namespace TranqService.Common.Logic
 {
     internal static class InstallHelper
     {
+        // VersionAccess class for update check funcs
 
+        
         //HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Run
         // ^add string
 
-        
+
     }
 }

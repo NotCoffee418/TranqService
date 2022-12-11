@@ -19,3 +19,4 @@ global using TranqService.Common.Abstract;
 global using System.Collections.Concurrent;
 global using System.ComponentModel;
 global using System.Linq.Expressions;
+global using TranqService.Common.Data;
