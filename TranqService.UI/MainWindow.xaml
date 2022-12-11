@@ -20,7 +20,7 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
                 <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                    <ItemsControl ItemsSource="{Binding PlaylistDownloadEntries}">
+                    <ItemsControl x:Name="PlaylistEntriesItemControl" ItemsSource="{Binding PlaylistDownloadEntries}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel>
@@ -73,12 +73,12 @@
                                                         <ColumnDefinition Width="Auto"/>
                                                     </Grid.ColumnDefinitions>
                                                     <TextBox
-                                                    Grid.Column="0"
-                                                    Text="{Binding OutputDirectory}"/>
+                                                        Grid.Column="0"
+                                                        Text="{Binding OutputDirectory}"/>
                                                     <Button Grid.Column="1" Margin="10,0,0,0"
-                                                    Content="Select Directory"
-                                                    Tag="{Binding Path=DataContext, RelativeSource={RelativeSource Self}}"
-                                                    Click="SelectPlaylistDirectory_Click" />
+                                                        Content="Change Directory"
+                                                        Tag="{Binding Path=DataContext, RelativeSource={RelativeSource Self}}"
+                                                        Click="SelectPlaylistDirectory_Click" />
                                                 </Grid>
 
                                                 <TextBlock FontSize="12" 
@@ -97,14 +97,23 @@
 
 
                                             <!-- Download format -->
+
                                             <TextBlock 
-                                            Grid.Row="3" Grid.Column="0" Margin="0,5" 
-                                            VerticalAlignment="Center" 
-                                            Text="Format" />
-                                            <ComboBox 
-                                            Grid.Row="3" Grid.Column="1" Margin="0,5" 
-                                            ItemsSource="{Binding DownloadFormatEnumData, RelativeSource={RelativeSource AncestorType=local:MainWindow}}"
-                                            SelectedItem="{Binding OutputAs}" />
+                                                Grid.Row="3" Grid.Column="0" Margin="0,5" 
+                                                VerticalAlignment="Center" 
+                                                Text="Format" />
+
+                                            <Grid  Grid.Row="3" Grid.Column="1" Margin="0,5">
+                                                <ComboBox                                             
+                                                    ItemsSource="{Binding DownloadFormatEnumData, RelativeSource={RelativeSource AncestorType=local:MainWindow}}"
+                                                    SelectedItem="{Binding OutputAs}" />
+                                                <Button 
+                                                    HorizontalAlignment="Right" 
+                                                    Content="Remove"
+                                                    Tag="{Binding Path=DataContext, RelativeSource={RelativeSource Self}}"
+                                                    Click="RemovePlaylist_Click"/>
+                                            </Grid>
+                                            
 
                                         </Grid>
                                     </Border>

@@ -53,6 +53,12 @@ namespace TranqService.UI
             };
             DataContext = FullContext;
         }
+
+        private void RefreshPlaylists()
+        {
+            PlaylistEntriesItemControl.ItemsSource = null;
+            PlaylistEntriesItemControl.ItemsSource = FullContext.PlaylistSetupContext.PlaylistDownloadEntries;
+        }
         
         private void OpenDataDirectory_Click(object sender, RoutedEventArgs e)
             => Process.Start("explorer.exe", PathHelper.GetAppdataPath(false));
@@ -113,8 +119,34 @@ namespace TranqService.UI
 
             // Update if selected
             if (result == WinForms.DialogResult.OK)
-                playlistEntry.OutputDirectory = fbd.SelectedPath;
-            
+                playlistEntry.OutputDirectory = fbd.SelectedPath;            
+        }
+        
+        private void RemovePlaylist_Click(object sender, RoutedEventArgs e)
+        {
+            // Request confirmation
+            MessageBoxResult result = MessageBox.Show("Are you sure you want to remove this playlist from downloading any new additions?", 
+                "Remove Playlist",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning, 
+                MessageBoxResult.No);
+            if (result != MessageBoxResult.Yes)
+                return;
+
+            // Grab the relevant playlist entry from the button's tag
+            var entry = ((Button)sender).Tag as PlaylistDownloadEntry;
+
+            // Find and remove the entry
+            FullContext.PlaylistSetupContext.DownloadSourcesConfig.PlaylistDownloadEntries
+                .RemoveAll(x => 
+                x.PlaylistId == entry.PlaylistId && 
+                x.OutputAs == entry.OutputAs && 
+                x.VideoPlatform == entry.VideoPlatform && 
+                x.DateAdded == entry.DateAdded);
+            FullContext.PlaylistSetupContext.Save();
+
+            // Refresh UI
+            RefreshPlaylists();
         }
     }
 }
