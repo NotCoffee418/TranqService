@@ -1,3 +1,5 @@
+using TranqService.Common.Logic;
+
 namespace TranqService.Services;
 public class YoutubeDownloadService : BackgroundService
 {
@@ -29,6 +31,13 @@ public class YoutubeDownloadService : BackgroundService
         // Start checking for new downloadable items
         while (!stoppingToken.IsCancellationRequested)
         {
+            if (!await InstallationHealth.IsConfigAcceptableAsync())
+            {
+                _logger.Warning("Configuration is incomplete. Checking again in one minute.");
+                await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
+                continue;
+            }
+            
             _logger.Information("YoutubeDownloadService: Checking for youtube downloads at: {0}", DateTimeOffset.Now);
 
             // Process all playlists
@@ -36,8 +45,8 @@ public class YoutubeDownloadService : BackgroundService
             _logger.Information("YoutubeDownloaderService: Download session complete.");
 
 
-            // Check every hour
-            await Task.Delay(TimeSpan.FromHours(1), stoppingToken);
+            // Check 5 minutes
+            await Task.Delay(TimeSpan.FromMinutes(10), stoppingToken);
         }
     }
 
