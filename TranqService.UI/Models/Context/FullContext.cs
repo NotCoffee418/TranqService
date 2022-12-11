@@ -21,4 +21,15 @@ public class FullContext : NotificationObject
         get => Get<PlaylistSetupContext>(nameof(PlaylistSetupContext));
         set => Set(nameof(PlaylistSetupContext), value);
     }
+
+    /// <summary>
+    /// Assume healthy by default.
+    /// Don't rely on this directly for anything other than display purposes.
+    /// It is updated when config changes
+    /// </summary>
+    public bool IndicateConfigAcceptable
+    {
+        get => Get<bool>(nameof(IndicateConfigAcceptable), true);
+        set => Set(nameof(IndicateConfigAcceptable), value);
+    }
 }

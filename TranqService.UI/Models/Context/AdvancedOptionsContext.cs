@@ -48,7 +48,7 @@ public class AdvancedOptionsContext : NotificationObject
             AppPaths paths = task.Result;
             paths.AppSettingsDir = OverrideConfigDir;
             paths.DatabaseFile = OverrideDatabasePath;
-
+            
             // Update the file with the updated properties
             paths.SaveAsync().ContinueWith(task =>
             {

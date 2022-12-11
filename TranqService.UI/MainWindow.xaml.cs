@@ -17,6 +17,7 @@ using TranqService.Common.DataAccess;
 using TranqService.UI.Models.Context;
 using TranqService.Common.Data;
 using System.IO;
+using TranqService.Common.Logic;
 
 namespace TranqService.UI
 {
@@ -54,10 +55,49 @@ namespace TranqService.UI
             DataContext = FullContext;
         }
 
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            // Check initial config validity after registering event listener
+            UpdateConfigValidityIndicators();
+        }
+
         private void RefreshPlaylists()
         {
             PlaylistEntriesItemControl.ItemsSource = null;
             PlaylistEntriesItemControl.ItemsSource = FullContext.PlaylistSetupContext.PlaylistDownloadEntries;
+        }
+
+        private void UpdateConfigValidityIndicators()
+        {
+            // Adjust this if it changes
+            int setupTabIndex = 1;
+
+            // -- Force setup tab if config is not acceptable
+            // Hacky delay to give config time to save to file
+            Task.Delay(200).ContinueWith(_ =>
+            {
+                // Check if config is acceptable
+                InstallationHealth.IsConfigAcceptableAsync()
+                    .ContinueWith(task => Application.Current.Dispatcher.Invoke(new Action(() =>
+                    {
+                        FullContext.IndicateConfigAcceptable = task.Result;
+                        if (!FullContext.IndicateConfigAcceptable)
+                            MainTabControl.SelectedIndex = 1;
+
+                        // Adjust enabled-ness regardless
+                        for (int i = 0; i < MainTabControl.Items.Count; i++)
+                            if (MainTabControl.Items[i] is TabItem tabItem)
+                            {
+                                bool shouldEnable = FullContext.IndicateConfigAcceptable;
+                                if (i == setupTabIndex) // Always enable setup tab
+                                    tabItem.IsEnabled = true;
+                                else tabItem.IsEnabled = shouldEnable;
+                            }
+                    })));
+            });
+            
+            
+            
         }
 
         private (bool UserSelected, string? Path) SelectDirectory(
@@ -99,9 +139,17 @@ namespace TranqService.UI
             => Process.Start("explorer.exe", PathHelper.GetAppdataPath(false));
 
         private void SetupSave_Click(object sender, RoutedEventArgs e)
-            => FullContext.SetupContext.Save();
+        {
+            FullContext.SetupContext.Save();
+            UpdateConfigValidityIndicators();
+        }
+
+
         private void DownloadSourcesSave_Click(object sender, RoutedEventArgs e)
-            => FullContext.PlaylistSetupContext.Save();
+        {
+            FullContext.PlaylistSetupContext.Save();
+            UpdateConfigValidityIndicators();
+        }
         
 
         private void AdvancedSettingsSave_Click(object sender, RoutedEventArgs e)
@@ -114,7 +162,10 @@ namespace TranqService.UI
                 MessageBoxImage.Warning,
                 MessageBoxResult.No);
             if (confirmation == MessageBoxResult.Yes)
+            {
                 FullContext.AdvancedOptionsContext.Save();
+                UpdateConfigValidityIndicators();
+            }
         }
 
         private void GetYtApi_Click(object sender, RoutedEventArgs e)
@@ -188,5 +239,6 @@ namespace TranqService.UI
             // Refresh UI
             RefreshPlaylists();
         }
+
     }
 }

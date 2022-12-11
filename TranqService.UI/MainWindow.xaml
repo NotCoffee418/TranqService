@@ -11,8 +11,9 @@
         ui:WindowHelper.UseModernWindowStyle="True"
         ui:ThemeManager.IsThemeAware="True"
         Title="MainWindow" Height="780" Width="978"
-        Background="Black">
-    <TabControl Grid.Column="1">
+        Background="Black"
+        Loaded="Window_Loaded">
+    <TabControl x:Name="MainTabControl" Grid.Column="1">
         <TabItem Header="Playlists" DataContext="{Binding PlaylistSetupContext}">
             <Grid >
                 <Grid.RowDefinitions>
