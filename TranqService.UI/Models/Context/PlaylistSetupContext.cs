@@ -11,6 +11,19 @@ public class PlaylistSetupContext : NotificationObject
         DownloadSourcesConfig = DownloadSources.Get();
     }
 
+    /// <summary>
+    /// Working property for creating new entries.
+    /// </summary>
+    public PlaylistCreationInfo CreationEntry
+    {
+        get => Get<PlaylistCreationInfo>(nameof(CreationEntry), new());
+        set => Set(nameof(CreationEntry), value);
+    }
+
+    /// <summary>
+    /// The list of playlists that are currently configured.
+    /// Should be used to modify the collection
+    /// </summary>
     public DownloadSources DownloadSourcesConfig
     {
         get => Get<DownloadSources>(nameof(DownloadSourcesConfig));

@@ -59,6 +59,41 @@ namespace TranqService.UI
             PlaylistEntriesItemControl.ItemsSource = null;
             PlaylistEntriesItemControl.ItemsSource = FullContext.PlaylistSetupContext.PlaylistDownloadEntries;
         }
+
+        private (bool UserSelected, string? Path) SelectDirectory(
+            DownloadFormat selectedFormat,
+            string processedKnownDir)
+        {
+            // Check known if selected directory is valid and exists
+            if (!string.IsNullOrEmpty(processedKnownDir))
+            {
+                processedKnownDir = PathHelper.GetProcessedWildcardDirectory(processedKnownDir, skipDirectoryCreate: true);
+                if (!Directory.Exists(processedKnownDir))
+                    processedKnownDir = null;
+            }
+
+            // Select ideal directory for the defined settings
+            string startingDir;
+            if (PathHelper.IsValidDirectoryPath(processedKnownDir) && Directory.Exists(processedKnownDir))
+                startingDir = processedKnownDir;
+            else if (selectedFormat == DownloadFormat.Audio)
+                startingDir = Environment.GetFolderPath(Environment.SpecialFolder.MyMusic);
+            else if (selectedFormat == DownloadFormat.Video)
+                startingDir = Environment.GetFolderPath(Environment.SpecialFolder.MyVideos);
+            else startingDir = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+
+            // Request folder select
+            var fbd = new WinForms.FolderBrowserDialog()
+            {
+                SelectedPath = startingDir,
+                ShowNewFolderButton = true
+            };
+            WinForms.DialogResult result = fbd.ShowDialog();
+
+            // Return selection if any
+            return result == WinForms.DialogResult.OK ?
+                (true, fbd.SelectedPath) : (false, null);
+        }
         
         private void OpenDataDirectory_Click(object sender, RoutedEventArgs e)
             => Process.Start("explorer.exe", PathHelper.GetAppdataPath(false));
@@ -85,43 +120,48 @@ namespace TranqService.UI
         private void GetYtApi_Click(object sender, RoutedEventArgs e)
             => Process.Start("explorer.exe", "https://console.cloud.google.com/apis/library/youtube.googleapis.com");
 
-        private void SelectPlaylistDirectory_Click(object sender, RoutedEventArgs e)
+        private void SelectEditPlaylistDirectory_Click(object sender, RoutedEventArgs e)
         {
             // Grab the relevant playlist entry from the button's tag
-            var playlistEntry = ((Button)sender).Tag as PlaylistDownloadEntry;
+            var pe = ((Button)sender).Tag as PlaylistDownloadEntry;
+            (bool changed, string newDir) = SelectDirectory(pe.OutputAs, pe.OutputDirectory);
+            if (changed) pe.OutputDirectory = newDir;
+        }
+        private void SelectCreationPlaylistDirectory_Click(object sender, RoutedEventArgs e)
+        {
+            // Grab the relevant playlist entry from the button's tag
+            var pci = ((Button)sender).Tag as PlaylistCreationInfo;
+            (bool changed, string newDir) = SelectDirectory(pci.OutputAs, pci.OutputDirectory);
+            if (changed) pci.OutputDirectory = newDir;
+        }
 
-            // Check if selected directory is valid and exists
-            string? processedKnownDir = null;
-            if (!string.IsNullOrEmpty(playlistEntry.OutputDirectory))
+        private void AddPlaylist_Click(object sender, RoutedEventArgs e)
+        {
+            // Extract creation info from tag
+            var pci = ((Button)sender).Tag as PlaylistCreationInfo;
+
+            // Attempt to generate new playlist entry
+            PlaylistDownloadEntry newEntry = PlaylistDownloadEntry.ExtractFromUrl(pci.PlaylistUrl, pci.OutputDirectory, pci.OutputAs);
+            if (newEntry is null)
             {
-                processedKnownDir = PathHelper.GetProcessedWildcardDirectory(playlistEntry.OutputDirectory, skipDirectoryCreate: true);
-                if (!Directory.Exists(processedKnownDir))
-                    processedKnownDir = null;
+                MessageBox.Show(
+                    "Directory is undefined or playlist url could not be interpreted as any of the supported streaming platforms.", 
+                    "Failed to extract playlist", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+            (bool isValid, string validationError) = newEntry.Validate();
+            if (!isValid)
+            {
+                MessageBox.Show(validationError, "Invalid input", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
             }
 
-            // Select ideal directory for the defined settings
-            string startingDir;
-            if (!string.IsNullOrEmpty(processedKnownDir))
-                startingDir = processedKnownDir;
-            else if (playlistEntry.OutputAs == DownloadFormat.Audio)
-                startingDir = Environment.GetFolderPath(Environment.SpecialFolder.MyMusic);
-            else if (playlistEntry.OutputAs == DownloadFormat.Video)
-                startingDir = Environment.GetFolderPath(Environment.SpecialFolder.MyVideos);
-            else startingDir = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-
-            // Request folder select
-            var fbd = new WinForms.FolderBrowserDialog()
-            {
-                SelectedPath = startingDir,
-                ShowNewFolderButton = true
-            };
-            WinForms.DialogResult result = fbd.ShowDialog();
-
-            // Update if selected
-            if (result == WinForms.DialogResult.OK)
-                playlistEntry.OutputDirectory = fbd.SelectedPath;            
+            // Add to playlist entries
+            FullContext.PlaylistSetupContext.DownloadSourcesConfig.PlaylistDownloadEntries.Add(newEntry);
+            FullContext.PlaylistSetupContext.Save();
+            RefreshPlaylists();
         }
-        
+
         private void RemovePlaylist_Click(object sender, RoutedEventArgs e)
         {
             // Request confirmation

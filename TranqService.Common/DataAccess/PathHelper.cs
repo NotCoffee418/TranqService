@@ -66,4 +66,22 @@ public static class PathHelper
 
         return processedDirectory;
     }
+
+    public static bool IsValidDirectoryPath(string? path)
+    {
+        if (string.IsNullOrEmpty(path)) return false;
+        try
+        {
+            // this throws error if path is impossible
+            // https://stackoverflow.com/questions/3137097/check-if-a-string-is-a-valid-windows-directory-folder-path
+            _ = Path.GetFullPath(path);
+
+            // No relative path
+            return Path.IsPathRooted(path);
+        }
+        catch
+        {
+            return false;
+        }
+    }
 }

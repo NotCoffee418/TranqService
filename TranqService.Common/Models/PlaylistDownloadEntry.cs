@@ -62,11 +62,14 @@ public class PlaylistDownloadEntry : NotificationObject
 
         if (OutputAs == DownloadFormat.Unspecified)
             return (false, "Output format was not specified");
+
+        if (string.IsNullOrEmpty(OutputDirectory))
+            return (false, "Save directory must be defined");
         
         if (OutputDirectory.Contains(":/"))
             return (false, "Directory path must be a directory. Detected possible url");
         
-        if (!Uri.IsWellFormedUriString(PathHelper.GetProcessedWildcardDirectory(OutputDirectory), UriKind.Absolute))
+        if (!PathHelper.IsValidDirectoryPath(OutputDirectory))
             return (false, "Directory path is not in a valid format");
 
         // Valid, return success
@@ -85,6 +88,11 @@ public class PlaylistDownloadEntry : NotificationObject
         unformattedOutputDirectory, 
         DownloadFormat outputAs)
     {
+        // Validate inputs
+        if (string.IsNullOrEmpty(playlistUrl) || string.IsNullOrEmpty(unformattedOutputDirectory))
+            return null;
+
+        // Prepare base entry
         PlaylistDownloadEntry entry = new PlaylistDownloadEntry()
         {
             OutputDirectory = unformattedOutputDirectory,
@@ -98,6 +106,7 @@ public class PlaylistDownloadEntry : NotificationObject
         {
             entry.VideoPlatform = Platform.YouTube;
             entry.OutputDirectory = unformattedOutputDirectory;
+            entry.PlaylistId = rYoutubeEntry.Match(playlistUrl).Groups[1].Value;
             return entry;
         }
 

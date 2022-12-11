@@ -14,18 +14,124 @@
         Background="Black">
     <TabControl Grid.Column="1">
         <TabItem Header="Playlists" DataContext="{Binding PlaylistSetupContext}">
-            <Grid>
+            <Grid >
                 <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
-                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+
+                <!-- Add new Playlist Item -->
+                <GroupBox
+                    Grid.Row="0" Margin="20"
+                    Header="Add Playlist"
+                    DataContext="{Binding CreationEntry}">
+                    <Border 
+                        Margin="0,0,0,-20" 
+                        BorderThickness="2" 
+                        BorderBrush="DarkCyan"
+                        CornerRadius="8">
+                        <Grid Margin="10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="150"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            
+                            <!-- Playlist Url -->
+                            <TextBlock 
+                                Grid.Row="0" Grid.Column="0" Margin="0,5"
+                                VerticalAlignment="Center" 
+                                Text="Playlist Url" />
+                            <TextBox 
+                                Grid.Row="0" Grid.Column="1" Margin="0,5" 
+                                    Text="{Binding PlaylistUrl}" />
+
+                            <!-- Output Directory -->
+                            <TextBlock 
+                                Grid.Row="1" Grid.Column="0" Margin="0,5" 
+                                VerticalAlignment="Center" 
+                                Text="Save Directory" />
+                            <StackPanel 
+                                Grid.Row="1" Grid.Column="1" Margin="0,5" 
+                                Orientation="Vertical">
+
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox
+                                        Grid.Column="0"
+                                        Text="{Binding OutputDirectory}"/>
+                                    <Button Grid.Column="1" Margin="10,0,0,0"
+                                        Content="Select Directory"
+                                        Tag="{Binding Path=DataContext, RelativeSource={RelativeSource Self}}"
+                                        Click="SelectCreationPlaylistDirectory_Click" />
+                                </Grid>
+
+                                <TextBlock FontSize="12" 
+                                    Text="Optional wildcards: {Year}">
+                                    <TextBlock.ToolTip>
+                                        <ToolTip>
+                                            <TextBlock>
+                                                Wildcards can be used to programatically replace a part of the path with a programmatic variable.
+                                                <LineBreak />For example 'C:\\{Year}' would be 
+                                                <LineBreak />interpreted as 'C:\\2023'.
+                                            </TextBlock>
+                                        </ToolTip>
+                                    </TextBlock.ToolTip>
+                                </TextBlock>
+                            </StackPanel>
+
+                            <!-- Format and create -->
+                            <TextBlock 
+                                Grid.Row="2" Grid.Column="0" Margin="0,5" 
+                                VerticalAlignment="Center" 
+                                Text="Save as" />
+                            <Grid  Grid.Row="2" Grid.Column="1" Margin="0,5">
+                                <ComboBox                                             
+                                    ItemsSource="{Binding DownloadFormatEnumData, RelativeSource={RelativeSource AncestorType=local:MainWindow}}"
+                                    SelectedItem="{Binding OutputAs}" />
+                                <Button 
+                                    HorizontalAlignment="Right" 
+                                    Content="Activate Playlist"
+                                    Padding="10,5"
+                                    Background="DarkGreen" 
+                                    Tag="{Binding Path=DataContext, RelativeSource={RelativeSource Self}}"
+                                    Click="AddPlaylist_Click"/>
+                            </Grid>
+
+                        </Grid>
+                    </Border>
+                </GroupBox>
+
+                <Separator Grid.Row="1" />
+                <!-- Existing Playlist Items -->
+                <GroupBox Margin="20"
+                    Grid.Row="2"
+                    Header="Active Playlists">
+                    
+                    <ScrollViewer Margin="0,-10,-20,-20" Padding="0,0,20,0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                     <ItemsControl x:Name="PlaylistEntriesItemControl" ItemsSource="{Binding PlaylistDownloadEntries}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel>
-                                    <Border BorderThickness="2" BorderBrush="DimGray" Margin="10" Padding="10">
-                                        <Grid>
+                                    <Border 
+                                        Margin="0,10" 
+                                        BorderThickness="2" 
+                                        BorderBrush="DimGray"
+                                        CornerRadius="8">
+                                        <Grid Margin="10">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="150"/>
                                                 <ColumnDefinition Width="*"/>
@@ -60,9 +166,9 @@
 
                                             <!-- Output Directory -->
                                             <TextBlock 
-                                            Grid.Row="2" Grid.Column="0" Margin="0,5" 
-                                            VerticalAlignment="Center" 
-                                            Text="Save Directory" />
+                                                Grid.Row="2" Grid.Column="0" Margin="0,5" 
+                                                VerticalAlignment="Center" 
+                                                Text="Save Directory" />
                                             <StackPanel 
                                             Grid.Row="2" Grid.Column="1" Margin="0,5" 
                                             Orientation="Vertical">
@@ -78,7 +184,7 @@
                                                     <Button Grid.Column="1" Margin="10,0,0,0"
                                                         Content="Change Directory"
                                                         Tag="{Binding Path=DataContext, RelativeSource={RelativeSource Self}}"
-                                                        Click="SelectPlaylistDirectory_Click" />
+                                                        Click="SelectEditPlaylistDirectory_Click" />
                                                 </Grid>
 
                                                 <TextBlock FontSize="12" 
@@ -92,7 +198,7 @@
                                                             </TextBlock>
                                                         </ToolTip>
                                                     </TextBlock.ToolTip>
-                                            </TextBlock>
+                                                </TextBlock>
                                             </StackPanel>
 
 
@@ -122,14 +228,15 @@
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
                 </ScrollViewer>
+
+                </GroupBox>
                 <Button 
+                    Grid.Row="3"
                     Background="DarkGreen" 
                     Width="128"
                     Padding="10"
-                    Margin="30,10,0,20"
-                    Grid.Row="1" 
-                    Grid.Column="1" 
-                    Content="Save" 
+                    Margin="20,0,0,20"
+                    Content="Save Changes" 
                     IsEnabled="{Binding CanSave}" 
                     Click="DownloadSourcesSave_Click" />
             </Grid>
@@ -159,7 +266,8 @@
                         <TextBlock Grid.Row="0" Grid.Column="0" Text="Required" FontSize="32" Foreground="LightSlateGray" />
                         <GroupBox Grid.Row="1" Header="YouTube API Key" >
                             <StackPanel Orientation="Vertical">
-                                <TextBlock Margin="10,0" ClipToBounds="False" Text="This key is (for now) still required to use the service."/>
+                                <TextBlock ClipToBounds="False" 
+                                    Text="This key is (for now) still required to use the service."/>
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/>
@@ -168,9 +276,10 @@
                                     <TextBox 
                                         Grid.Column="0"
                                         Text="{Binding YoutubeApiKey}" 
-                                        Margin="10"
+                                        Margin="0,10"
                                         HorizontalAlignment="Stretch"/>
                                     <Button 
+                                        Margin="10,0,0,0"
                                         Grid.Column="1"
                                         Content="Get API Key"
                                         Click="GetYtApi_Click"/>
@@ -184,7 +293,7 @@
                         <TextBlock Grid.Row="3" Text="Optional" FontSize="32" Foreground="LightSlateGray" />
                         <GroupBox Header="Discord Logging" Grid.Row="4">
                             <StackPanel Orientation="Vertical">
-                                <TextBlock Margin="10,0" Text="Optionally send warnings and errors to a discord server using webhooks."/>
+                                <TextBlock Margin="0,0,0,10" Text="Optionally send warnings and errors to a discord server using webhooks."/>
                                 <Grid>
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto"/>
