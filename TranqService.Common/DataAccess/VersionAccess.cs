@@ -5,15 +5,15 @@ public static class VersionAccess
     public static async Task<bool> IsServiceUpdateAvailableAsync()
     {
         var latestVersionT = GetRemoteServiceVersionTimeAsync();
-        var currentVersionT = GetRemoteUiVersionTimeAsync();
-        return await latestVersionT > await currentVersionT;
+        var localVersionT = GetInstalledServiceVersionTimeAsync();
+        return await latestVersionT > await localVersionT;
     }
 
-    public static async Task<bool> IsUiServiceUpdateAvailableAsync()
+    public static async Task<bool> IsUiUpdateAvailableAsync()
     {
-        var latestVersionT = GetRemoteServiceVersionTimeAsync();
-        var currentVersionT = GetRemoteUiVersionTimeAsync();
-        return await latestVersionT > await currentVersionT;
+        var latestVersionT = GetRemoteUiVersionTimeAsync();
+        var localVersionT = GetInstalledUiVersionTimeAsync();
+        return await latestVersionT > await localVersionT;
     }
 
     public static Task<DateTime?> GetRemoteServiceVersionTimeAsync()
