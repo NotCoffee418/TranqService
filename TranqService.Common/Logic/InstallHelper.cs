@@ -6,7 +6,12 @@ using System.Threading.Tasks;
 
 namespace TranqService.Common.Logic
 {
-    internal class InstallHelper
+    internal static class InstallHelper
     {
+
+        //HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Run
+        // ^add string
+
+        
     }
 }

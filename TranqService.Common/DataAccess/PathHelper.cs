@@ -84,4 +84,11 @@ public static class PathHelper
             return false;
         }
     }
+
+    public static string GetServiceDeployDirectory()
+        => GetAppdataPath(false, "deploy", "service");
+
+    public static string GetUiDeployDirectory()
+        => GetAppdataPath(false, "deploy", "ui");
+
 }
