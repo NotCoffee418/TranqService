@@ -1,5 +1,7 @@
 ﻿// .NET
 global using System.Reflection;
+global using System.Diagnostics;
+global using System.Runtime.InteropServices;
 
 // Packages
 global using Serilog;
@@ -12,6 +14,7 @@ global using Polly.Contrib.WaitAndRetry;
 
 // Internal
 global using TranqService;
+global using TranqService.StaticLogic;
 global using TranqService.Services;
 global using TranqService.Shared.Logic;
 global using TranqService.Common;
