@@ -44,7 +44,7 @@ jobs:
       uses: thedoctor0/zip-release@0.6.2
       with:
         type: 'zip'
-        directory: './deployer/builds/tranqservice-ui-windows-latest'
+        directory: 'deployer/builds/tranqservice-ui-windows-latest'
         filename: '${{ github.workspace }}/deployer/upload/ui-windows-latest.zip'
         
     - name: Upload Service to S3 (Windows)
@@ -54,7 +54,7 @@ jobs:
         AWS_REGION: 'eu-central-1'
         AWS_SECRET_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        package: '${{ github.workspace }}/deployer/upload/service-windows-latest.zip'
+        package: 'deployer/upload/service-windows-latest.zip'
 
     - name: Upload UI to S3 (Windows)
       uses: stcalica/s3-upload@0.0.1
