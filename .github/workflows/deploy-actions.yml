@@ -17,6 +17,7 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 7.0.x
+
         
     - name: Restore dependencies
       run: dotnet restore TranqService.sln
@@ -30,8 +31,13 @@ jobs:
     - name: Create Deployable builds
       run: |
         mkdir -p ${{ github.workspace }}/deployer/upload
-        dotnet publish TranqService/TranqService.csproj --os=win -c Release -o ./deployer/builds/tranqservice-service-windows-latest
-        dotnet publish TranqService.UI/TranqService.UI.csproj --os=win -c Release -o ./deployer/builds/tranqservice-ui-windows-latest
+        dotnet publish TranqService/TranqService.csproj --os=win -c Release -o ./deployer/builds/win64/service
+        dotnet publish TranqService.UI/TranqService.UI.csproj --os=win -c Release -o ./deployer/builds/win64/ui
+
+    - name: Create Windows Installer
+      run: | 
+        docker run --rm -i -v ${PWD}:/work amake/innosetup create-windows-installer.iss
+        mv ./Output/TranqServiceInstaller.exe ./deployer/TranqServiceInstaller.exe
 
     - name: Upload ZIP to S3 (Service - Windows)
       uses: NotCoffee418/s3-zip-upload@v1
@@ -41,7 +47,7 @@ jobs:
         BUCKET_NAME: ${{ secrets.AWS_S3_BUCKET }}
         AWS_REGION: eu-central-1
         SOURCE_MODE: ZIP
-        SOURCE_PATH: ./deployer/builds/tranqservice-service-windows-latest
+        SOURCE_PATH: ./deployer/builds/win64/service
         DEST_FILE: service-windows-latest.zip
 
     - name: Upload ZIP to S3 (UI - Windows)
@@ -52,5 +58,16 @@ jobs:
         BUCKET_NAME: ${{ secrets.AWS_S3_BUCKET }}
         AWS_REGION: eu-central-1
         SOURCE_MODE: ZIP
-        SOURCE_PATH: ./deployer/builds/tranqservice-ui-windows-latest
+        SOURCE_PATH: ./deployer/builds/win64/ui
         DEST_FILE: ui-windows-latest.zip
+
+    - name: Upload ZIP to S3 (Installer - Windows)
+      uses: NotCoffee418/s3-zip-upload@v1
+      env:
+        AWS_SECRET_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        BUCKET_NAME: ${{ secrets.AWS_S3_BUCKET }}
+        AWS_REGION: eu-central-1
+        SOURCE_MODE: FILE
+        SOURCE_PATH: ./deployer/TranqServiceInstaller.exe
+        DEST_FILE: TranqServiceInstaller.exe
