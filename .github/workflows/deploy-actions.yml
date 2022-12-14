@@ -34,7 +34,7 @@ jobs:
         dotnet publish TranqService.UI/TranqService.UI.csproj --os=win -c Release -o ./deployer/builds/tranqservice-ui-windows-latest
 
     - name: Upload ZIP to S3 (Service - Windows)
-      uses: NotCoffee418/s3-zip-upload@v0.2
+      uses: NotCoffee418/s3-zip-upload@v1
       env:
         AWS_SECRET_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -45,7 +45,7 @@ jobs:
         DEST_FILE: service-windows-latest.zip
 
     - name: Upload ZIP to S3 (UI - Windows)
-      uses: NotCoffee418/s3-zip-upload@v0.2
+      uses: NotCoffee418/s3-zip-upload@v1
       env:
         AWS_SECRET_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
