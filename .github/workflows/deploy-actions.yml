@@ -32,37 +32,25 @@ jobs:
         mkdir -p ${{ github.workspace }}/deployer/upload
         dotnet publish TranqService/TranqService.csproj --os=win -c Release -o ./deployer/builds/tranqservice-service-windows-latest
         dotnet publish TranqService.UI/TranqService.UI.csproj --os=win -c Release -o ./deployer/builds/tranqservice-ui-windows-latest
-      
-    - name: Zip Service (Windows)
-      uses: thedoctor0/zip-release@0.6.2
-      with:
-        type: 'zip'
-        directory: 'deployer/builds/tranqservice-service-windows-latest'
-        filename: ${{ github.workspace }}/deployer/upload/service-windows-latest.zip
 
-    - name: Zip UI (Windows)
-      uses: thedoctor0/zip-release@0.6.2
-      with:
-        type: 'zip'
-        directory: 'deployer/builds/tranqservice-ui-windows-latest'
-        filename: '${{ github.workspace }}/deployer/upload/ui-windows-latest.zip'
-        
-    - name: Upload Service to S3 (Windows)
-      uses: stcalica/s3-upload@0.0.1
-      with:
-        bucket: ${{ secrets.AWS_S3_BUCKET }}
-        AWS_REGION: 'eu-central-1'
-        AWS_SECRET_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        key: service-windows-latest.zip
-        package: 'deployer/upload/service-windows-latest.zip'
+    - name: Upload ZIP to S3 (Service - Windows)
+      uses: NotCoffee418/s3-zip-upload
+      env:
+        AWS_SECRET_ID: ${{ secrets.AWS_SECRET_ID }}
+        AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
+        AWS_BUCKET: ${{ secrets.AWS_BUCKET }}
+        AWS_REGION: eu-central-1
+        SOURCE_MODE: ZIP
+        SOURCE_PATH: ./deployer/builds/tranqservice-service-windows-latest
+        DEST_FILE: service-windows-latest.zip
 
-    - name: Upload UI to S3 (Windows)
-      uses: stcalica/s3-upload@0.0.1
-      with:
-        bucket: ${{ secrets.AWS_S3_BUCKET }}
-        AWS_REGION: 'eu-central-1'
-        AWS_SECRET_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        key: ui-windows-latest.zip
-        package: '${{ github.workspace }}/deployer/upload/ui-windows-latest.zip'
+    - name: Upload ZIP to S3 (UI - Windows)
+      uses: NotCoffee418/s3-zip-upload
+      env:
+        AWS_SECRET_ID: ${{ secrets.AWS_SECRET_ID }}
+        AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
+        AWS_BUCKET: ${{ secrets.AWS_BUCKET }}
+        AWS_REGION: eu-central-1
+        SOURCE_MODE: ZIP
+        SOURCE_PATH: ./deployer/builds/tranqservice-ui-windows-latest
+        DEST_FILE: ui-windows-latest.zip
