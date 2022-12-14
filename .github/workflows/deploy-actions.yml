@@ -36,9 +36,9 @@ jobs:
     - name: Upload ZIP to S3 (Service - Windows)
       uses: NotCoffee418/s3-zip-upload@v0.2
       env:
-        AWS_SECRET_ID: ${{ secrets.AWS_SECRET_ID }}
-        AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
-        AWS_BUCKET: ${{ secrets.AWS_BUCKET }}
+        AWS_SECRET_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        BUCKET_NAME: ${{ secrets.AWS_S3_BUCKET }}
         AWS_REGION: eu-central-1
         SOURCE_MODE: ZIP
         SOURCE_PATH: ./deployer/builds/tranqservice-service-windows-latest
@@ -47,9 +47,9 @@ jobs:
     - name: Upload ZIP to S3 (UI - Windows)
       uses: NotCoffee418/s3-zip-upload@v0.2
       env:
-        AWS_SECRET_ID: ${{ secrets.AWS_SECRET_ID }}
-        AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
-        AWS_BUCKET: ${{ secrets.AWS_BUCKET }}
+        AWS_SECRET_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        BUCKET_NAME: ${{ secrets.AWS_S3_BUCKET }}
         AWS_REGION: eu-central-1
         SOURCE_MODE: ZIP
         SOURCE_PATH: ./deployer/builds/tranqservice-ui-windows-latest
