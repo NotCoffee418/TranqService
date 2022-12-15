@@ -185,9 +185,8 @@ public class YoutubeDownloadService : BackgroundService
                             _logger.Warning("File was already downloaded from this url, marking as complete: {0}", 
                                 $"{videoData.VideoGuid} {videoData.Name}");
                         }
-                        // File has the same name, has copyright data but a mismatched ID.
+                        // File has the same name, has comment data but a mismatched ID.
                         // This likely means it's a new file with the same name and should be re-downloaded with the new ID
-                        // This is already edge-casy but it will download the file again if a copy with the id'd name also exists.
                         else
                         {
                             doDownload = true;
@@ -196,6 +195,10 @@ public class YoutubeDownloadService : BackgroundService
                                 Path.GetFileNameWithoutExtension(finalPath) + $"_{videoData.VideoGuid}" + Path.GetExtension(finalPath));
                             _logger.Warning("File already exists, but is not the same video. Renaming the file title: {0}", 
                                 $"{videoData.VideoGuid} {videoData.Name}");
+
+                            // If that file too is already downloaded, don't re-download
+                            if (File.Exists(finalPath))
+                                doDownload = false;
                         }
                     }
                         
