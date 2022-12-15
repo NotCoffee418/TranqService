@@ -384,7 +384,30 @@
                             HorizontalAlignment="Stretch"/>
                         </StackPanel>
                     </GroupBox>
-                   <Grid Grid.Row="3" Margin="10,5" VerticalAlignment="Bottom" HorizontalAlignment="Stretch">
+                    <GroupBox Header="Reset download state for a YouTube playlist" Grid.Row="2">
+                        <StackPanel Orientation="Vertical">
+                            <TextBlock Margin="10,0" Text="This will remove all knowledge of a playlist from the database and result in videos being re-downloaded."/>
+                            <TextBlock Margin="10,0" Text="Not that videos will only re-download if a file with a matching name does not already exist."/>
+                            <TextBlock Margin="10,0" Text="It may also result in duplicate files if the video owner has changed the title."/>
+                            <TextBlock Margin="10,0" Text="Ideally, this should only be used if the folder for that playlist was also removed locally."/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Youtube Playlist ID" VerticalAlignment="Center" />
+                                <TextBox Grid.Column="1"
+                                    x:Name="ResetPlaylistIdTextBox"
+                                    Margin="10"
+                                    HorizontalAlignment="Stretch"/>
+                                <Button Grid.Column="2" Content="Reset Playlist" 
+                                    x:Name="ResetYoutubePlaylistBtn" Click="ResetYoutubePlaylist_Click"/>
+                            </Grid>
+                            
+                        </StackPanel>
+                    </GroupBox>
+                    <Grid Grid.Row="3" Margin="10,5" VerticalAlignment="Bottom" HorizontalAlignment="Stretch">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
