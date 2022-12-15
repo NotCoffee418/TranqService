@@ -164,31 +164,36 @@ public class YoutubeDownloadService : BackgroundService
                             .WaitAndRetryAsync(delay);
 
                         // Download the video to temp path
+                        bool success = false;
+                        string? errorMsg = "Undefined error (TS)";
                         PolicyResult downloadResult = await retryPolicy.ExecuteAndCaptureAsync(async () =>
                         {
                             string videoUrl = $"https://www.youtube.com/watch?v={videoData.VideoGuid}";
                             switch (outputFormat)
                             {
                                 case "mp3":
-                                    await _ytdlp.DownloadAudioAsync(videoUrl, tmpPath);
+                                    (success, errorMsg) = await _ytdlp.DownloadAudioAsync(videoUrl, tmpPath);
                                     break;
                                 case "mp4":
-                                    await _ytdlp.DownloadVideoAsync(videoUrl, tmpPath);
+                                    (success, errorMsg) = await _ytdlp.DownloadVideoAsync(videoUrl, tmpPath);
                                     break;
                                 default:
-                                    throw new ArgumentException("Invalid output format specified");
+                                    success = false;
+                                    errorMsg = "Invalid output format requested. This is a TranqService bug.";
+                                    markAsComplete = false;
+                                    break;
                             }                            
                         });
                         
                         // Move the file to it's final destination
-                        if (downloadResult.Outcome == OutcomeType.Successful)
+                        if (success && downloadResult.Outcome == OutcomeType.Successful)
                             File.Move(tmpPath, finalPath, overwrite:true);
                         else
                         {
                             // Log exception
-                            markAsComplete = false;
+                            videoData.ErrorMessage = errorMsg;
                             _logger.Error("YoutubeDownloaderService failed to download video: {0} {1} {2}",
-                                videoData.VideoGuid, videoData.Name, downloadResult.FinalException.Message);
+                                videoData.VideoGuid, videoData.Name, errorMsg);
                         }
                     }
 

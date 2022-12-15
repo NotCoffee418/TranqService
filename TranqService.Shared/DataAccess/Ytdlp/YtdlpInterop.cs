@@ -12,15 +12,15 @@ public class YtdlpInterop : IYtdlpInterop
         _ytdlpPaths = ytdlpPaths;
         _logger = logger;
     }
-    
+
     const string VideoFormatData = "-f \"bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best\" --prefer-ffmpeg --add-metadata --embed-thumbnail --metadata-from-title \"%(artist)s - %(title)s\" --no-warnings";
     const string AudioFormatData = "-x --audio-format mp3 --prefer-ffmpeg --add-metadata --embed-thumbnail --metadata-from-title \"%(artist)s - %(title)s\" --no-warnings";
 
 
-    public Task<bool> DownloadVideoAsync(string videoUrl, string savePath)
+    public Task<(bool Success, string? ErrorMessage)> DownloadVideoAsync(string videoUrl, string savePath)
         => RunYtdlpCommandAsync(videoUrl, savePath, VideoFormatData);
 
-    public Task<bool> DownloadAudioAsync(string videoUrl, string savePath)
+    public Task<(bool Success, string? ErrorMessage)> DownloadAudioAsync(string videoUrl, string savePath)
         => RunYtdlpCommandAsync(videoUrl, savePath, AudioFormatData);
 
     public async Task<bool> ValidateFfmpegInstallationAsync()
@@ -31,7 +31,7 @@ public class YtdlpInterop : IYtdlpInterop
         return versionOutput.StartsWith("ffmpeg version ");
     }
 
-    private async Task<bool> RunYtdlpCommandAsync(string inputUrl, string outputFile, string formatData)
+    private async Task<(bool Success, string? ErrorMessage)> RunYtdlpCommandAsync(string inputUrl, string outputFile, string formatData)
     {
         // Get relevant paths
         string ytdlpExe = _ytdlpPaths.GetYtdlpExePath();
@@ -59,9 +59,18 @@ public class YtdlpInterop : IYtdlpInterop
             if (File.Exists(outputFile))
                 File.Delete(outputFile);
             _logger.Error(ex.Message, ex);
-            return false;
+
+            // Attempt to extract a clean error
+            string errorMessage = ex.Message;
+            if (ex.Message.Contains("ERROR:"))
+            {
+                errorMessage = ex.Message.Split(Environment.NewLine)
+                    .Where(x => x.Contains("ERROR:"))
+                    .First().Trim();
+            }
+            return (false, errorMessage);
         }
-        return true;
+        return (true, null);
     }
 
     /// <summary>
