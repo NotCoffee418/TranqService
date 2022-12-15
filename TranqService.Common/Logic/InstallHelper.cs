@@ -57,7 +57,8 @@ public static class InstallHelper
             PathHelper.GetUiDeployDirectory());
 
         // Restart service if it was running
-        Process.Start(Path.Combine(PathHelper.GetUiDeployDirectory(), "TranqService.exe"));
+        if (foundRunningProcesses > 0)
+            Process.Start(Path.Combine(PathHelper.GetUiDeployDirectory(), "TranqService.exe"));
     }
 
     /// <summary>
@@ -94,12 +95,8 @@ public static class InstallHelper
         {
             // Download update
             using (var s = await AppConstants.HTTPCLIENT.GetStreamAsync(AppConstants.LatestServiceVersionUrl))
-            {
                 using (var fs = new FileStream(zipPath, FileMode.CreateNew))
-                {
                     await s.CopyToAsync(fs);
-                }
-            }
 
             // Extract it // Check if the destination folder exists. If it doesn't, create it.
             if (!Directory.Exists(deployProgramDir))
