@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\TranqService.Common\TranqService.Common.csproj" />
+    <ProjectReference Include="..\TranqService.Database\TranqService.Database.csproj" />
   </ItemGroup>
 
 </Project>

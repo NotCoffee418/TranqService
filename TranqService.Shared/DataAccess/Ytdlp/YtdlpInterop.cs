@@ -1,4 +1,6 @@
-﻿namespace TranqService.Shared.DataAccess.Ytdlp;
+﻿using System.Text.RegularExpressions;
+
+namespace TranqService.Shared.DataAccess.Ytdlp;
 
 public class YtdlpInterop : IYtdlpInterop
 {
@@ -12,26 +14,54 @@ public class YtdlpInterop : IYtdlpInterop
         _ytdlpPaths = ytdlpPaths;
         _logger = logger;
     }
-    
+
     const string VideoFormatData = "-f \"bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best\" --prefer-ffmpeg --add-metadata --embed-thumbnail --metadata-from-title \"%(artist)s - %(title)s\" --no-warnings";
     const string AudioFormatData = "-x --audio-format mp3 --prefer-ffmpeg --add-metadata --embed-thumbnail --metadata-from-title \"%(artist)s - %(title)s\" --no-warnings";
 
 
-    public Task<bool> DownloadVideoAsync(string videoUrl, string savePath)
+    public Task<(bool Success, string? ErrorMessage)> DownloadVideoAsync(string videoUrl, string savePath)
         => RunYtdlpCommandAsync(videoUrl, savePath, VideoFormatData);
 
-    public Task<bool> DownloadAudioAsync(string videoUrl, string savePath)
+    public Task<(bool Success, string? ErrorMessage)> DownloadAudioAsync(string videoUrl, string savePath)
         => RunYtdlpCommandAsync(videoUrl, savePath, AudioFormatData);
 
     public async Task<bool> ValidateFfmpegInstallationAsync()
     {
-        string workingDir = Path.GetDirectoryName(_ytdlpPaths.GetYtdlpExePath());
-        string ffmpegPath = Path.Join(workingDir, "ffmpeg");
-        string versionOutput = await RunCommandAsync(workingDir, ffmpegPath, "-version");
-        return versionOutput.StartsWith("ffmpeg version ");
+        (bool success, string outputStr) = await RunFfmpegCommand("-version");
+        return success && outputStr.StartsWith("ffmpeg version ");
     }
 
-    private async Task<bool> RunYtdlpCommandAsync(string inputUrl, string outputFile, string formatData)
+    public async Task<string> GetCommentMetadata(string filePath)
+    {
+        if (!await ValidateFfmpegInstallationAsync())
+            throw new Exception("Error: ffmpeg not installed");
+
+        try
+        {
+            (bool success, string outputStr) = await RunFfprobeCommand($"-v quiet -of flat=s=_ -show_entries format_tags=comment \"{filePath}\"");
+            if (success)
+            {
+                // Example output: format_tags_comment="https://www.youtube.com/watch?v=videoidhere" (newline)
+                if (string.IsNullOrEmpty(outputStr) || !outputStr.Contains("format_tags_comment"))
+                    return null;
+                
+                // Clear trailing whitespace and extract full url
+                outputStr = outputStr.TrimEnd('\r', '\n');
+                Regex rUrlFromTag = new Regex("format_tags_comment=\"(.+)\"(.+)?");
+                if (!rUrlFromTag.IsMatch(outputStr))
+                    return null;
+                return rUrlFromTag.Match(outputStr).Groups[1].Value;
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.Error(ex, "Error getting copyright metadata. Continuing the application.");
+        }
+
+        return string.Empty;
+    }
+
+    private async Task<(bool Success, string? ErrorMessage)> RunYtdlpCommandAsync(string inputUrl, string outputFile, string formatData)
     {
         // Get relevant paths
         string ytdlpExe = _ytdlpPaths.GetYtdlpExePath();
@@ -59,10 +89,60 @@ public class YtdlpInterop : IYtdlpInterop
             if (File.Exists(outputFile))
                 File.Delete(outputFile);
             _logger.Error(ex.Message, ex);
-            return false;
+
+            // Attempt to extract a clean error
+            string errorMessage = ex.Message;
+            if (ex.Message.Contains("ERROR:"))
+            {
+                errorMessage = ex.Message.Split(Environment.NewLine)
+                    .Where(x => x.Contains("ERROR:"))
+                    .First().Trim();
+            }
+            return (false, errorMessage);
         }
-        return true;
+        return (true, null);
     }
+
+    private async Task<(bool Success, string ErrorMessage)> RunFfmpegCommand(string args)
+    {
+        // Get relevant paths
+        string ffmpegExe = _ytdlpPaths.GetFfmpegExePath();
+        string workingDir = Path.GetDirectoryName(ffmpegExe);
+
+        // Call
+        string outputStr = null;
+        try
+        {
+            outputStr = await RunCommandAsync(workingDir, ffmpegExe, args);
+        }
+        catch (Exception ex)
+        {
+            _logger.Error(ex.Message, ex);
+            return (false, ex.Message);
+        }
+        return (true, outputStr);
+    }
+
+    private async Task<(bool Success, string ErrorMessage)> RunFfprobeCommand(string args)
+    {
+        // Get relevant paths
+        string ffmpegExe = _ytdlpPaths.GetFfprobeExePath();
+        string workingDir = Path.GetDirectoryName(ffmpegExe);
+
+        // Call
+        string outputStr = null;
+        try
+        {
+            outputStr = await RunCommandAsync(workingDir, ffmpegExe, args);
+        }
+        catch (Exception ex)
+        {
+            _logger.Error(ex.Message, ex);
+            return (false, ex.Message);
+        }
+        return (true, outputStr);
+    }
+
 
     /// <summary>
     /// 

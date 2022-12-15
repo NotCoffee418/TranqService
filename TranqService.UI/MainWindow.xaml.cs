@@ -18,6 +18,9 @@ using TranqService.UI.Models.Context;
 using TranqService.Common.Data;
 using System.IO;
 using TranqService.Common.Logic;
+using TranqService.Database;
+using TranqService.Database.Queries;
+using TranqService.UI.Models;
 
 namespace TranqService.UI
 {
@@ -45,12 +48,13 @@ namespace TranqService.UI
 
         private void InitContext()
         {
-            
+
             FullContext = new()
             {
                 AdvancedOptionsContext = new(),
                 SetupContext = new(),
                 PlaylistSetupContext = new(),
+                FailedDownloadsContext = new()
             };
             DataContext = FullContext;
         }
@@ -61,6 +65,7 @@ namespace TranqService.UI
             UpdateConfigValidityIndicators();
             UpdateService();
             BackgroundWatchServiceState();
+            ReloadFailedDownloadsData();
         }
 
         private void RefreshPlaylists()
@@ -163,7 +168,18 @@ namespace TranqService.UI
             return result == WinForms.DialogResult.OK ?
                 (true, fbd.SelectedPath) : (false, null);
         }
-        
+
+        private void ReloadFailedDownloadsData()
+        {
+            var ytQueries = new YoutubeVideoInfoQueries(new Db());
+            ytQueries.GetErroredVideosAsync()
+                .ContinueWith(task => Application.Current.Dispatcher.Invoke(new Action(() =>
+                {
+                    List<FailedDatatableModel> dtData = task.Result.Select(x => new FailedDatatableModel(x)).ToList();
+                    FullContext.FailedDownloadsContext.FailedDownloadsDataView = dtData;
+                })));
+        }
+
         private void OpenDataDirectory_Click(object sender, RoutedEventArgs e)
             => Process.Start("explorer.exe", PathHelper.GetAppdataPath(false));
         private void StartService_Click(object sender, RoutedEventArgs e)
@@ -206,9 +222,15 @@ namespace TranqService.UI
             {
                 (e.Source as Button).IsEnabled = true;
             })));
-            
-            foreach (var p in serviceProcesses)
-                p.Kill();
+            try
+            {
+                foreach (var p in serviceProcesses)
+                    p.Kill();
+            }
+            catch (Exception ex)
+            {                
+                MessageBox.Show(ex.Message, "An error has occurred stopping the service", MessageBoxButton.OK, MessageBoxImage.Error);
+            }            
             return;
         }
 
@@ -315,5 +337,81 @@ namespace TranqService.UI
             RefreshPlaylists();
         }
 
+        private void ChangeFormatCombobox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            // Only ask this after first spawn change
+            if ((sender as ComboBox).Tag is null)
+            {
+                (sender as ComboBox).Tag = true;
+                return;
+            }
+
+            // Ask for confirmation to ensure the user understands.
+            if (MessageBox.Show("Are you sure you want to change the output format of this playlist?" + Environment.NewLine +
+                    "This will not affect any videos already downloaded. Only new videos added to the playlist. " + Environment.NewLine + Environment.NewLine +
+                    "If you want to re-download the playlist as a different output format, you need to stop the service and remove the playlist from the database in advanced settings.",
+                    "Change Output Format",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Warning,
+                    MessageBoxResult.No) != MessageBoxResult.Yes)
+            {
+                e.Handled = false;
+            }
+        }
+
+        private void CopyTagToClipboard_Click(object sender, RoutedEventArgs e)
+        {
+            string url = (e.OriginalSource as Button).Tag.ToString();
+            if (string.IsNullOrEmpty(url)) return;
+            Clipboard.SetText(url);
+        }
+
+        private void ResetYoutubePlaylist_Click(object sender, RoutedEventArgs e)
+        {
+            ResetYoutubePlaylistBtn.IsEnabled = false;
+            string playlistId = ResetPlaylistIdTextBox.Text ?? "invalid";
+            if (string.IsNullOrEmpty(playlistId))
+            {
+                MessageBox.Show("This playlist ID or URL could not be parsed. No changes have been made.", "Invalid ID",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+                ResetYoutubePlaylistBtn.IsEnabled = true;
+                return;
+            }
+
+            // Sketchy no-DI approach for now.
+            var ytQueries = new YoutubeVideoInfoQueries(new Db());
+            ytQueries.CountVideosInPlaylist(playlistId).ContinueWith(countTask => Application.Current.Dispatcher.Invoke(new Action(() =>
+            {
+                int videosInPlaylist = countTask.Result;
+
+                // Validate playlist
+                if (videosInPlaylist == 0)
+                {
+                    MessageBox.Show("This playlist has no videos. Make sure you paste the playist ID only, without the URL. No changes have been made.", "Empty Playlist",
+                        MessageBoxButton.OK, MessageBoxImage.Information);
+                    ResetYoutubePlaylistBtn.IsEnabled = true;
+                    return;
+                }
+
+                // Offer cancellation
+                if (MessageBox.Show($"This playlist has {videosInPlaylist} videos downloaded. Are you sure you want to remove these entries from the database?",
+                    "Confirm playlist reset", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No) != MessageBoxResult.Yes)
+                {
+                    MessageBox.Show("This playlist has no videos. No changes have been made.", "Empty Playlist",
+                        MessageBoxButton.OK, MessageBoxImage.Information);
+                    ResetYoutubePlaylistBtn.IsEnabled = true;
+                    return;
+                }
+
+                // Do the removal
+                ytQueries.UnregisterVideosInPlaylist(playlistId).ContinueWith(deleteTask => Application.Current.Dispatcher.Invoke(new Action(() =>
+                {
+                    MessageBox.Show("The playlist has been reset. You can now re-download it.", "Reset successful",
+                            MessageBoxButton.OK, MessageBoxImage.Information);
+                    ResetYoutubePlaylistBtn.IsEnabled = true;
+                })));
+            })));
+        }
+        
     }
 }

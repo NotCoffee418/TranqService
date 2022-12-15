@@ -43,7 +43,7 @@ public class YoutubeVideoInfoQueries : IYoutubeVideoInfoQueries
             context.YoutubeVideoInfos.AddRange(videoInfos);
             await context.SaveChangesAsync();
         }
-        finally { markVideosAsDownloadedSemaphore.Release(); }        
+        finally { markVideosAsDownloadedSemaphore.Release(); }
     }
 
     public async Task<int> CountDownloadedVideosAsync()
@@ -53,4 +53,43 @@ public class YoutubeVideoInfoQueries : IYoutubeVideoInfoQueries
             .CountAsync();
     }
 
+    public async Task<int> CountVideosInPlaylist(string playlistId)
+    {
+        using var context = _db.GetContext();
+        return await context.YoutubeVideoInfos
+            .Where(x => x.PlaylistGuid == playlistId)
+            .CountAsync();
+    }
+
+    /// <summary>
+    /// Removes all videos in a playlist from the datanase
+    /// </summary>
+    /// <param name="playlistId"></param>
+    /// <returns></returns>
+    public async Task UnregisterVideosInPlaylist(string playlistId)
+    {
+        using var context = _db.GetContext();
+        var deletables = await context.YoutubeVideoInfos
+            .Where(x => x.PlaylistGuid == playlistId)
+            .ToListAsync();
+        context.YoutubeVideoInfos.RemoveRange(deletables);
+        await context.SaveChangesAsync();
+    }
+
+    public async Task<YoutubeVideoInfo[]> GetErroredVideosAsync()
+    {
+        using var context = _db.GetContext();
+        return await context.YoutubeVideoInfos
+            .Where(x => x.ErrorMessage != null && x.ErrorMessage != string.Empty)
+            .ToArrayAsync();
+    }
+
+    public async Task RemoveErrorFromVideo(YoutubeVideoInfo vinfo)
+    {
+        using var context = _db.GetContext();
+        context.Attach(vinfo);
+        vinfo.ErrorMessage = null;
+        context.Entry(vinfo).Property(p => p.ErrorMessage).IsModified = true;
+        await context.SaveChangesAsync();
+    }
 }

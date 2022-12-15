@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
-	<!--<Nullable>enable</Nullable> this must be off for correct model generation -->
+    <!-- <Nullable>enable</Nullable>  must be off for correct model generation -->	
 	<LangVersion>latest</LangVersion>
   </PropertyGroup>
 

@@ -101,6 +101,7 @@ public class PlaylistDownloadEntry : NotificationObject
 
         // Try youtube
         // Finds: https://youtube.com/playlist?list=PLRESTOFTHEID&somethingsomething
+        // Also finds plain id! this can be a hazard maybe
         Regex rYoutubeEntry = new Regex(@"(\S+youtu.+\/playlist?.+list=)?(PL[a-zA-Z0-9\-_]+)(&.+)?");
         if (rYoutubeEntry.IsMatch(playlistUrl))
         {
@@ -114,6 +115,22 @@ public class PlaylistDownloadEntry : NotificationObject
 
 
         // No matches found, return null
+        return null;
+    }
+
+    public static string? ExtractVideoGuidFromUrl(string videoUrl)
+    {
+        if (string.IsNullOrEmpty(videoUrl))
+            return null;
+        
+        // Match YouTube url
+        Regex rYoutubeVideo = new Regex(@"\S+((youtube.+\/watch?.+?v=)|(youtu.be\/))([a-zA-Z0-9\-_]+)(&.+)?");
+        if (rYoutubeVideo.IsMatch(videoUrl))
+        {
+            return rYoutubeVideo.Match(videoUrl).Groups[4].Value;
+        }
+
+        // No matches. Return null
         return null;
     }
 }

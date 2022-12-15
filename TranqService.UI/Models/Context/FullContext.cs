@@ -22,6 +22,12 @@ public class FullContext : NotificationObject
         set => Set(nameof(PlaylistSetupContext), value);
     }
 
+    public FailedDownloadsContext FailedDownloadsContext
+    {
+        get => Get<FailedDownloadsContext>(nameof(FailedDownloadsContext));
+        set => Set(nameof(FailedDownloadsContext), value);
+    }
+
     /// <summary>
     /// Assume healthy by default.
     /// Don't rely on this directly for anything other than display purposes.
