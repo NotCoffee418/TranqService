@@ -206,9 +206,15 @@ namespace TranqService.UI
             {
                 (e.Source as Button).IsEnabled = true;
             })));
-            
-            foreach (var p in serviceProcesses)
-                p.Kill();
+            try
+            {
+                foreach (var p in serviceProcesses)
+                    p.Kill();
+            }
+            catch (Exception ex)
+            {                
+                MessageBox.Show(ex.Message, "An error has occurred stopping the service", MessageBoxButton.OK, MessageBoxImage.Error);
+            }            
             return;
         }
 
@@ -315,5 +321,22 @@ namespace TranqService.UI
             RefreshPlaylists();
         }
 
+        private void ChangeFormatCombobox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            // Only after window is loaded
+            if (!this.IsLoaded) return;
+
+            // Ask for confirmation to ensure the user understands.
+            if (MessageBox.Show("Are you sure you want to change the output format of this playlist?" + Environment.NewLine +
+                    "This will not affect any videos already downloaded. Only new videos added to the playlist. " + Environment.NewLine + Environment.NewLine +
+                    "If you want to re-download the playlist as a different output format, you need to stop the service and remove the playlist from the database in advanced settings.",
+                    "Change Output Format",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Warning,
+                    MessageBoxResult.No) != MessageBoxResult.Yes)
+            {
+                e.Handled = false;
+            }
+        }
     }
 }

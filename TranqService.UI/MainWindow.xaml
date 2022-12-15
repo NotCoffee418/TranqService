@@ -223,13 +223,14 @@
 
                                                     <Grid  Grid.Row="3" Grid.Column="1" Margin="0,5">
                                                         <ComboBox                                             
-                                                    ItemsSource="{Binding DownloadFormatEnumData, RelativeSource={RelativeSource AncestorType=local:MainWindow}}"
-                                                    SelectedItem="{Binding OutputAs}" />
+                                                            ItemsSource="{Binding DownloadFormatEnumData, RelativeSource={RelativeSource AncestorType=local:MainWindow}}"
+                                                            SelectedItem="{Binding OutputAs}"
+                                                            SelectionChanged="ChangeFormatCombobox_SelectionChanged" />
                                                         <Button 
-                                                    HorizontalAlignment="Right" 
-                                                    Content="Remove"
-                                                    Tag="{Binding Path=DataContext, RelativeSource={RelativeSource Self}}"
-                                                    Click="RemovePlaylist_Click"/>
+                                                            HorizontalAlignment="Right" 
+                                                            Content="Remove"
+                                                            Tag="{Binding Path=DataContext, RelativeSource={RelativeSource Self}}"
+                                                            Click="RemovePlaylist_Click"/>
                                                     </Grid>
 
 

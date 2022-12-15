@@ -1,4 +1,6 @@
-﻿namespace TranqService.Database.Models; 
+﻿using static TranqService.Common.Data.Enums;
+
+namespace TranqService.Database.Models; 
 public class YoutubeVideoInfo
 {
     public int Id { get; set; }
@@ -11,6 +13,7 @@ public class YoutubeVideoInfo
 
     public string Name { get; set; } = null;
     public string Uploader { get; set; } = null;
+    
 
     public string GetFileName(string outputFormat)
         => $"{Name}.{outputFormat}";

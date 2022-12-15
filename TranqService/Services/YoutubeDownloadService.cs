@@ -25,11 +25,15 @@ public class YoutubeDownloadService : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        // Ensure only 1 instance is running        
+        CloseOtherServiceProcesses();
+
         // Check for UI updates. Can be long running task since it waits for user to close UI if it's open.
         _ = Task.Run(async () => await InstallHelper.TryUpdateServiceAsync());
 
         // Update yt-dlp once on startup
         await _ytdlpUpdater.TryUpdateYtdlpAsync();
+        
 
         // Start checking for new downloadable items
         while (!stoppingToken.IsCancellationRequested)
@@ -201,5 +205,24 @@ public class YoutubeDownloadService : BackgroundService
                 if (File.Exists(path))
                     File.Delete(path);
         }
+    }
+    
+    private void CloseOtherServiceProcesses()
+    {
+        var allServiceProcs = InstallHelper.GetServiceProcesses();
+        int currentServiceId = Process.GetCurrentProcess().Id;
+        foreach (var proc in allServiceProcs)
+            if (proc.Id != currentServiceId)
+            {
+                _logger.Information("Service was already running. Closing other instance process {ProcessId}", proc.Id);
+                try
+                {
+                    proc.Kill();
+                }
+                catch (Exception e)
+                {
+                    _logger.Error(e, "Failed to kill process {ProcessId}. {Message}", proc.Id, e.Message);
+                }
+            }
     }
 }
