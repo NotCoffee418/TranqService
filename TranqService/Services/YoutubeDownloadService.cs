@@ -153,9 +153,53 @@ public class YoutubeDownloadService : BackgroundService
                     tempFiles.Add(tmpPath);
                 
                     bool markAsComplete = true;
+                    bool doDownload = true;
                     if (File.Exists(finalPath))
-                        _logger.Warning("File already exists, marking as complete: {0}", $"{videoData.VideoGuid} {videoData.Name}");
-                    else
+                    {
+                        // Extract guid from metadata
+                        string metadataOutput;
+                        try
+                        {
+                            metadataOutput = await _ytdlp.GetCommentMetadata(finalPath);
+                        }
+                        catch // Happens on mismatch files
+                        {
+                            metadataOutput = null;
+                        }
+                        string metaVideoGuid = PlaylistDownloadEntry.ExtractVideoGuidFromUrl(metadataOutput);
+
+                        // Expect this if the file was not downloaded by tranqservice or on an old version
+                        // File exists and should be marked as such
+                        if (string.IsNullOrEmpty(metaVideoGuid))
+                        {
+                            doDownload = false;
+                            markAsComplete = true;
+                            _logger.Warning("File is likely duplicate, marking as complete: {0}", 
+                                $"{videoData.VideoGuid} {videoData.Name}");
+                        }
+                        // This is definitely a duplicate file
+                        else if (metaVideoGuid == videoData.VideoGuid)
+                        {
+                            doDownload = false;
+                            markAsComplete = true;
+                            _logger.Warning("File was already downloaded from this url, marking as complete: {0}", 
+                                $"{videoData.VideoGuid} {videoData.Name}");
+                        }
+                        // File has the same name, has copyright data but a mismatched ID.
+                        // This likely means it's a new file with the same name and should be re-downloaded with the new ID
+                        // This is already edge-casy but it will download the file again if a copy with the id'd name also exists.
+                        else
+                        {
+                            doDownload = true;
+                            markAsComplete = true;
+                            finalPath = Path.Combine(Path.GetDirectoryName(finalPath), 
+                                Path.GetFileNameWithoutExtension(finalPath) + $"_{videoData.VideoGuid}" + Path.GetExtension(finalPath));
+                            _logger.Warning("File already exists, but is not the same video. Renaming the file title: {0}", 
+                                $"{videoData.VideoGuid} {videoData.Name}");
+                        }
+                    }
+                        
+                    if (doDownload)
                     {
                         // Prepare retry policy
                         var delay = Backoff.ConstantBackoff(TimeSpan.FromMilliseconds(20000), retryCount: 5);
