@@ -75,4 +75,21 @@ public class YoutubeVideoInfoQueries : IYoutubeVideoInfoQueries
         context.YoutubeVideoInfos.RemoveRange(deletables);
         await context.SaveChangesAsync();
     }
+
+    public async Task<YoutubeVideoInfo[]> GetErroredVideosAsync()
+    {
+        using var context = _db.GetContext();
+        return await context.YoutubeVideoInfos
+            .Where(x => x.ErrorMessage != null && x.ErrorMessage != string.Empty)
+            .ToArrayAsync();
+    }
+
+    public async Task RemoveErrorFromVideo(YoutubeVideoInfo vinfo)
+    {
+        using var context = _db.GetContext();
+        context.Attach(vinfo);
+        vinfo.ErrorMessage = null;
+        context.Entry(vinfo).Property(p => p.ErrorMessage).IsModified = true;
+        await context.SaveChangesAsync();
+    }
 }
