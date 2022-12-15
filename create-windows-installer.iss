@@ -23,7 +23,7 @@ DisableDirPage=yes
 DisableProgramGroupPage=yes
 ; Remove the following line to run in administrative install mode (install for all users.)
 PrivilegesRequired=admin
-OutputBaseFilename=TranqServiceInstaller
+OutputBaseFilename=mysetup
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern

@@ -3,13 +3,13 @@ name: Build, test and deploy
 on:
   push:
     branches:
-    - action-tests
+    - main
 
 jobs:
   deploy:
     # tests expect windows because of yt-dlp (for now)
-    # Wix vs project also only compiles on windows (or so i've heard)
-    runs-on: windows-latest 
+    # Installer compiler also requires windows
+    runs-on: windows-latest
 
     steps:
     - uses: actions/checkout@v2
@@ -17,7 +17,6 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 7.0.x
-
         
     - name: Restore dependencies
       run: dotnet restore TranqService.sln
@@ -34,10 +33,11 @@ jobs:
         dotnet publish TranqService/TranqService.csproj --os=win -c Release -o ./deployer/builds/win64/service
         dotnet publish TranqService.UI/TranqService.UI.csproj --os=win -c Release -o ./deployer/builds/win64/ui
 
-    - name: Create Windows Installer
-      run: | 
-        docker run --rm -i -v ${PWD}:/work amake/innosetup create-windows-installer.iss
-        mv ./Output/TranqServiceInstaller.exe ./deployer/TranqServiceInstaller.exe
+    - name: Create Windows installer
+      uses: NotCoffee418/is-build-action@master
+      with:
+        path-to-script: create-windows-installer.iss
+        artifact-name: TranqServiceInstaller.exe
 
     - name: Upload ZIP to S3 (Service - Windows)
       uses: NotCoffee418/s3-zip-upload@v1
@@ -69,5 +69,5 @@ jobs:
         BUCKET_NAME: ${{ secrets.AWS_S3_BUCKET }}
         AWS_REGION: eu-central-1
         SOURCE_MODE: FILE
-        SOURCE_PATH: ./deployer/TranqServiceInstaller.exe
+        SOURCE_PATH: TranqServiceInstaller.exe
         DEST_FILE: TranqServiceInstaller.exe
