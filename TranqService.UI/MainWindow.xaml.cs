@@ -59,6 +59,8 @@ namespace TranqService.UI
         {
             // Check initial config validity after registering event listener
             UpdateConfigValidityIndicators();
+            UpdateService();
+            BackgroundWatchServiceState();
         }
 
         private void RefreshPlaylists()
@@ -95,10 +97,37 @@ namespace TranqService.UI
                             }
                     })));
             });
-            
-            
-            
         }
+
+        private void UpdateService()
+        {
+            FullContext.StatusbarText = "Updating background service...";
+            InstallHelper.TryUpdateServiceAsync()
+                .ContinueWith(task => Application.Current.Dispatcher.Invoke(new Action(() =>
+                {
+                    FullContext.StatusbarText = string.Empty;
+                })));
+        }
+
+        private void BackgroundWatchServiceState()
+            => Task.Run(async () =>
+            {
+                string? previousState = null;
+                while (true)
+                {
+                    string newState = InstallHelper.IsServiceRunning() ? "running" : "stopped";
+                    if (previousState != newState)
+                    {
+                        Application.Current.Dispatcher.Invoke(new Action(() =>
+                        {
+                            FullContext.IsServiceRunningIndicator = $"Service is {newState}";
+                        }));
+                        previousState = newState;
+                    }
+
+                    await Task.Delay(5000);
+                }
+            });
 
         private (bool UserSelected, string? Path) SelectDirectory(
             DownloadFormat selectedFormat,

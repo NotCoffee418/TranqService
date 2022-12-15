@@ -25,6 +25,9 @@ public class YoutubeDownloadService : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        // Check for UI updates. Can be long running task since it waits for user to close UI if it's open.
+        _ = Task.Run(async () => await InstallHelper.TryUpdateServiceAsync());
+
         // Update yt-dlp once on startup
         await _ytdlpUpdater.TryUpdateYtdlpAsync();
 

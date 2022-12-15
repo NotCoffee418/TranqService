@@ -10,3 +10,7 @@ global using System.Collections.Generic;
 global using TranqService.Common.Models;
 global using TranqService.Common.Data;
 global using WinForms = System.Windows.Forms;
+global using TranqService.UI.Converters;
+global using System.Globalization;
+global using System.Windows.Data;
+global using System.Windows;

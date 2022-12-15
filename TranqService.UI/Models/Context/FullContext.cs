@@ -32,4 +32,25 @@ public class FullContext : NotificationObject
         get => Get<bool>(nameof(IndicateConfigAcceptable), true);
         set => Set(nameof(IndicateConfigAcceptable), value);
     }
+
+    public string IsServiceRunningIndicator
+    {
+        get => Get<string>(nameof(IsServiceRunningIndicator), "Checking service status...");
+        set => Set(nameof(IsServiceRunningIndicator), value);
+    }
+
+    /// <summary>
+    /// Can be updated to show a load bar and status text.
+    /// Should be cleared when the status has completed
+    /// </summary>
+    public string StatusbarText
+    {
+        get => Get<string>(nameof(StatusbarText), string.Empty);
+        set
+        {
+            Set(nameof(StatusbarText), value);
+            RaisePropertyChanged(nameof(ShowStatusbar));
+        }
+    }
+    public bool ShowStatusbar { get => !string.IsNullOrEmpty(StatusbarText); }
 }
