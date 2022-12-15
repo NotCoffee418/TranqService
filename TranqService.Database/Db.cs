@@ -2,26 +2,11 @@
 
 public class Db : IDb, IDesignTimeDbContextFactory<TranqDbContext>
 {
-    private IConfiguration _configuration;
-
     /// <summary>
-    /// Empty constructor required by Microsoft.EntityFrameworkCore.Design
+    /// An empty constructor is required by Microsoft.EntityFrameworkCore.Design
     /// </summary>
     public Db()
     {
-        string appsettingsPath = Path.Join(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "appsettings.json");
-        IConfigurationBuilder? localConfBuilder = new ConfigurationBuilder()
-            .AddJsonFile(appsettingsPath, optional: false);
-        _configuration = localConfBuilder.Build();
-    }
-
-    /// <summary>
-    /// Normal constructor initialized by autofac
-    /// </summary>
-    /// <param name="configuration"></param>
-    public Db(IConfiguration configuration)
-    {
-        _configuration = configuration;
     }
 
     private static bool FirstRequest { get; set; } = true;
@@ -37,7 +22,7 @@ public class Db : IDb, IDesignTimeDbContextFactory<TranqDbContext>
     public TranqDbContext GetContext()
     {
         mutex.WaitOne();
-        var context = new TranqDbContext(_configuration);
+        var context = new TranqDbContext();
 
         // Apply migrations on first request
         if (FirstRequest)
@@ -64,5 +49,5 @@ public class Db : IDb, IDesignTimeDbContextFactory<TranqDbContext>
     /// <param name="args"></param>
     /// <returns></returns>
     public TranqDbContext CreateDbContext(string[] args)
-        => new TranqDbContext(_configuration);
+        => new TranqDbContext();
 }

@@ -4,6 +4,6 @@
     {
         Task<int> CountDownloadedVideosAsync();
         Task<List<string>> GetDownloadedVideoGuidsInPlaylistAsync(string playlistGuid);
-        Task MarkVideoAsDownloadedAsync(YoutubeVideoInfo videoInfo);
+        Task MarkVideosAsDownloadedAsync(params YoutubeVideoInfo[] videoInfos);
     }
 }

@@ -1,0 +1,416 @@
+﻿<Window x:Class="TranqService.UI.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:System="clr-namespace:System;assembly=mscorlib"
+        xmlns:local="clr-namespace:TranqService.UI"
+        xmlns:conv="clr-namespace:TranqService.UI.Converters"
+        xmlns:CommonData="clr-class:TranqService.Common.Data;assembly=TranqService.Common"
+        mc:Ignorable="d"
+        xmlns:ui="http://schemas.modernwpf.com/2019"
+        ui:WindowHelper.UseModernWindowStyle="True"
+        ui:ThemeManager.IsThemeAware="True"
+        Title="TranqService Configuration" Height="780" Width="978"
+        Background="Black"
+        Loaded="Window_Loaded">
+    <Window.Resources>
+        <conv:BoolToVisibilityConverter
+            x:Key="BoolToHiddenConverter"
+            TrueValue="Visible" FalseValue="Collapsed" />
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="25"/>
+        </Grid.RowDefinitions>
+        <TabControl Grid.Row="0" x:Name="MainTabControl" Grid.Column="1">
+            <TabItem Header="Playlists" DataContext="{Binding PlaylistSetupContext}">
+                <Grid >
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Add new Playlist Item -->
+                    <GroupBox
+                    Grid.Row="0" Margin="20"
+                    Header="Add Playlist"
+                    DataContext="{Binding CreationEntry}">
+                        <Border 
+                        Margin="0,0,0,-20" 
+                        BorderThickness="2" 
+                        BorderBrush="DarkCyan"
+                        CornerRadius="8">
+                            <Grid Margin="10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="150"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <!-- Playlist Url -->
+                                <TextBlock 
+                                Grid.Row="0" Grid.Column="0" Margin="0,5"
+                                VerticalAlignment="Center" 
+                                Text="Playlist Url" />
+                                <TextBox 
+                                Grid.Row="0" Grid.Column="1" Margin="0,5" 
+                                    Text="{Binding PlaylistUrl}" />
+
+                                <!-- Output Directory -->
+                                <TextBlock 
+                                Grid.Row="1" Grid.Column="0" Margin="0,5" 
+                                VerticalAlignment="Center" 
+                                Text="Save Directory" />
+                                <StackPanel 
+                                Grid.Row="1" Grid.Column="1" Margin="0,5" 
+                                Orientation="Vertical">
+
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBox
+                                        Grid.Column="0"
+                                        Text="{Binding OutputDirectory}"/>
+                                        <Button Grid.Column="1" Margin="10,0,0,0"
+                                        Content="Select Directory"
+                                        Tag="{Binding Path=DataContext, RelativeSource={RelativeSource Self}}"
+                                        Click="SelectCreationPlaylistDirectory_Click" />
+                                    </Grid>
+
+                                    <TextBlock FontSize="12" 
+                                    Text="Optional wildcards: {Year}">
+                                        <TextBlock.ToolTip>
+                                            <ToolTip>
+                                                <TextBlock>
+                                                Wildcards can be used to programatically replace a part of the path with a programmatic variable.
+                                                <LineBreak />For example 'C:\\{Year}' would be 
+                                                <LineBreak />interpreted as 'C:\\2023'.
+                                                </TextBlock>
+                                            </ToolTip>
+                                        </TextBlock.ToolTip>
+                                </TextBlock>
+                                </StackPanel>
+
+                                <!-- Format and create -->
+                                <TextBlock 
+                                Grid.Row="2" Grid.Column="0" Margin="0,5" 
+                                VerticalAlignment="Center" 
+                                Text="Save as" />
+                                <Grid  Grid.Row="2" Grid.Column="1" Margin="0,5">
+                                    <ComboBox                                             
+                                    ItemsSource="{Binding DownloadFormatEnumData, RelativeSource={RelativeSource AncestorType=local:MainWindow}}"
+                                    SelectedItem="{Binding OutputAs}" />
+                                    <Button 
+                                    HorizontalAlignment="Right" 
+                                    Content="Activate Playlist"
+                                    Padding="10,5"
+                                    Background="DarkGreen" 
+                                    Tag="{Binding Path=DataContext, RelativeSource={RelativeSource Self}}"
+                                    Click="AddPlaylist_Click"/>
+                                </Grid>
+
+                            </Grid>
+                        </Border>
+                    </GroupBox>
+
+                    <Separator Grid.Row="1" />
+                    <!-- Existing Playlist Items -->
+                    <GroupBox Margin="20"
+                    Grid.Row="2"
+                    Header="Active Playlists">
+
+                        <ScrollViewer Margin="0,-10,-20,-20" Padding="0,0,20,0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                            <ItemsControl x:Name="PlaylistEntriesItemControl" ItemsSource="{Binding PlaylistDownloadEntries}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel>
+                                            <Border 
+                                        Margin="0,10" 
+                                        BorderThickness="2" 
+                                        BorderBrush="DimGray"
+                                        CornerRadius="8">
+                                                <Grid Margin="10">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="150"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <Grid.RowDefinitions>
+                                                        <RowDefinition Height="Auto"/>
+                                                        <RowDefinition Height="Auto"/>
+                                                        <RowDefinition Height="Auto"/>
+                                                        <RowDefinition Height="Auto"/>
+                                                        <RowDefinition Height="Auto"/>
+                                                        <RowDefinition Height="Auto"/>
+                                                    </Grid.RowDefinitions>
+
+                                                    <!-- Playlist Description -->
+                                                    <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,5" Text="Playlist Name" VerticalAlignment="Center" />
+                                                    <StackPanel 
+                                            Grid.Row="0" Grid.Column="1" Margin="0,5" 
+                                            Orientation="Horizontal">
+                                                        <TextBlock Text="YT" Margin="0,0,5,0"/>
+                                                        <TextBlock Text="(Loading...)"/>
+                                                    </StackPanel>
+
+                                                    <!-- Playlist Id -->
+                                                    <TextBlock 
+                                            Grid.Row="1" Grid.Column="0" Margin="0,5"
+                                            VerticalAlignment="Center" 
+                                            Text="Playlist Id" />
+                                                    <TextBox 
+                                            Grid.Row="1" Grid.Column="1" Margin="0,5" 
+                                                 Text="{Binding PlaylistId}" IsReadOnly="True"/>
+
+                                                    <!-- Output Directory -->
+                                                    <TextBlock 
+                                                Grid.Row="2" Grid.Column="0" Margin="0,5" 
+                                                VerticalAlignment="Center" 
+                                                Text="Save Directory" />
+                                                    <StackPanel 
+                                            Grid.Row="2" Grid.Column="1" Margin="0,5" 
+                                            Orientation="Vertical">
+
+                                                        <Grid>
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="*"/>
+                                                                <ColumnDefinition Width="Auto"/>
+                                                            </Grid.ColumnDefinitions>
+                                                            <TextBox
+                                                        Grid.Column="0"
+                                                        Text="{Binding OutputDirectory}"/>
+                                                            <Button Grid.Column="1" Margin="10,0,0,0"
+                                                        Content="Change Directory"
+                                                        Tag="{Binding Path=DataContext, RelativeSource={RelativeSource Self}}"
+                                                        Click="SelectEditPlaylistDirectory_Click" />
+                                                        </Grid>
+
+                                                        <TextBlock FontSize="12" 
+                                                Text="Optional wildcards: {Year}">
+                                                            <TextBlock.ToolTip>
+                                                                <ToolTip>
+                                                                    <TextBlock>
+                                                            Wildcards can be used to programatically replace a part of the path with a programmatic variable.
+                                                            <LineBreak />For example 'C:\\{Year}' would be 
+                                                            <LineBreak />interpreted as 'C:\\2023'.
+                                                                    </TextBlock>
+                                                                </ToolTip>
+                                                            </TextBlock.ToolTip>
+                                                </TextBlock>
+                                                    </StackPanel>
+
+
+                                                    <!-- Download format -->
+
+                                                    <TextBlock 
+                                                Grid.Row="3" Grid.Column="0" Margin="0,5" 
+                                                VerticalAlignment="Center" 
+                                                Text="Format" />
+
+                                                    <Grid  Grid.Row="3" Grid.Column="1" Margin="0,5">
+                                                        <ComboBox                                             
+                                                    ItemsSource="{Binding DownloadFormatEnumData, RelativeSource={RelativeSource AncestorType=local:MainWindow}}"
+                                                    SelectedItem="{Binding OutputAs}" />
+                                                        <Button 
+                                                    HorizontalAlignment="Right" 
+                                                    Content="Remove"
+                                                    Tag="{Binding Path=DataContext, RelativeSource={RelativeSource Self}}"
+                                                    Click="RemovePlaylist_Click"/>
+                                                    </Grid>
+
+
+                                                </Grid>
+                                            </Border>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+
+                    </GroupBox>
+                    <Button 
+                    Grid.Row="3"
+                    Background="DarkGreen" 
+                    Width="128"
+                    Padding="10"
+                    Margin="20,0,0,20"
+                    Content="Save Changes" 
+                    IsEnabled="{Binding CanSave}" 
+                    Click="DownloadSourcesSave_Click" />
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="Setup" DataContext="{Binding SetupContext}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                        <Grid Margin="20">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Required" FontSize="32" Foreground="LightSlateGray" />
+                            <GroupBox Grid.Row="1" Header="YouTube API Key" >
+                                <StackPanel Orientation="Vertical">
+                                    <TextBlock ClipToBounds="False" 
+                                    Text="This key is (for now) still required to use the service."/>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBox 
+                                        Grid.Column="0"
+                                        Text="{Binding YoutubeApiKey}" 
+                                        Margin="0,10"
+                                        HorizontalAlignment="Stretch"/>
+                                        <Button 
+                                        Margin="10,0,0,0"
+                                        Grid.Column="1"
+                                        Content="Get API Key"
+                                        Click="GetYtApi_Click"/>
+                                    </Grid>
+
+                                </StackPanel>
+                            </GroupBox>
+
+                            <Separator Grid.Row="2" Margin="-20,0" />
+
+                            <TextBlock Grid.Row="3" Text="Optional" FontSize="32" Foreground="LightSlateGray" />
+                            <GroupBox Header="Discord Logging" Grid.Row="4">
+                                <StackPanel Orientation="Vertical">
+                                    <TextBlock Margin="0,0,0,10" Text="Optionally send warnings and errors to a discord server using webhooks."/>
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="250" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <TextBlock 
+                                        Grid.Row="0" Grid.Column="0" 
+                                        VerticalAlignment="Center" FontSize="18" 
+                                        Text="Webhook Id"/>
+                                        <TextBox 
+                                        Grid.Row="0"
+                                        Grid.Column="1"
+                                        Text="{Binding DiscordWebhookId}" 
+                                        Margin="10"
+                                        HorizontalAlignment="Stretch"/>
+
+                                        <TextBlock 
+                                        Grid.Row="1" Grid.Column="0" 
+                                        VerticalAlignment="Center" FontSize="18" 
+                                        Text="Webhook Secret"/>
+                                        <TextBox 
+                                        Grid.Row="1"
+                                        Grid.Column="1"
+                                        Text="{Binding DiscordWebhookSecret}" 
+                                        Margin="10"
+                                        HorizontalAlignment="Stretch"/>
+                                    </Grid>
+                                </StackPanel>
+                            </GroupBox>
+                        </Grid>
+                    </ScrollViewer>
+                    <Button 
+                    Background="DarkGreen" 
+                    Width="128"
+                    Padding="10"
+                    Margin="30,10,0,20"
+                    Grid.Row="1" 
+                    Grid.Column="1" 
+                    Content="Save" 
+                    IsEnabled="{Binding CanSave}" 
+                    Click="SetupSave_Click" />
+
+                </Grid>
+
+            </TabItem>
+
+            <TabItem Header="Advanced" DataContext="{Binding AdvancedOptionsContext}">
+                <Grid Margin="20">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <GroupBox Header="Override Config Directory" Grid.Row="0">
+                        <StackPanel Orientation="Vertical">
+                            <TextBlock Margin="10,0" Text="Directory where config files will be located. Config files must be manually moved to this directory if this is modified."/>
+                            <TextBox 
+                            Text="{Binding OverrideConfigDir}" 
+                            Margin="10"
+                            HorizontalAlignment="Stretch"/>
+                        </StackPanel>
+                    </GroupBox>
+                    <GroupBox Header="Override Database Path" Grid.Row="1">
+                        <StackPanel Orientation="Vertical">
+                            <TextBlock Margin="10,0" Text="Path to SQLite database file. File will be created with a fresh database if it's not at this path."/>
+                            <TextBox 
+                            Text="{Binding OverrideDatabasePath}"
+                            Margin="10"
+                            HorizontalAlignment="Stretch"/>
+                        </StackPanel>
+                    </GroupBox>
+                   <Grid Grid.Row="3" Margin="10,5" VerticalAlignment="Bottom" HorizontalAlignment="Stretch">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                       
+                        <Button Content="Save" IsEnabled="{Binding CanSave}" Grid.Row="2" Width="128" Padding="10" Background="DarkGreen" Click="AdvancedSettingsSave_Click" />
+
+                        <StackPanel Grid.Column="1" Orientation="Horizontal">
+                            <Button Grid.Column="0" Margin="0,0,40,0" Content="Open data directory" Click="OpenDataDirectory_Click"/>
+                            <Button  Margin="0,0,10,0" Content="Start Service" Click="StartService_Click" />
+                            <Button Content="Stop Service" Click="StopService_Click" />
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+            </TabItem>
+        </TabControl>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0" Orientation="Horizontal" Visibility="{Binding ShowStatusbar, Converter={StaticResource BoolToHiddenConverter}}">
+                <ProgressBar Margin="5,0,10,0" Height="20" Width="100" IsIndeterminate="True"/>
+                <TextBlock Text="aaa {Binding StatusbarText}aaa"/>
+            </StackPanel>
+            <TextBlock Margin="10,0" HorizontalAlignment="Right" Grid.Column="1" Foreground="White" Text="{Binding IsServiceRunningIndicator}"/>
+        </Grid>
+    </Grid>
+</Window>

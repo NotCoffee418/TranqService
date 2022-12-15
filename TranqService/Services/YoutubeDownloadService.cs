@@ -1,39 +1,46 @@
-using TranqService.Shared.DataAccess.Ytdlp;
+using TranqService.Common.Logic;
 
 namespace TranqService.Services;
 public class YoutubeDownloadService : BackgroundService
 {
     private readonly Serilog.ILogger _logger;
-    private readonly IYoutubeSaveHelper _youtubeSaveHelper;
+    private readonly IPlaylistHelper _youtubeSaveHelper;
     private readonly IYoutubeVideoInfoQueries _youtubeQueries;
     private readonly IYtdlpUpdater _ytdlpUpdater;
-    private readonly IConfig _config;
     private readonly IYtdlpInterop _ytdlp;
 
     public YoutubeDownloadService(
         Serilog.ILogger logger,
-        IYoutubeSaveHelper youtubeSaveHelper,
+        IPlaylistHelper youtubeSaveHelper,
         IYoutubeVideoInfoQueries youtubeQueries,
         IYtdlpUpdater ytdlpUpdater,
-        IConfig config,
         IYtdlpInterop ytdlp)
     {
         _logger = logger;
         _youtubeSaveHelper = youtubeSaveHelper;
         _youtubeQueries = youtubeQueries;
         _ytdlpUpdater = ytdlpUpdater;
-        _config = config;
         _ytdlp = ytdlp;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        // Check for UI updates. Can be long running task since it waits for user to close UI if it's open.
+        _ = Task.Run(async () => await InstallHelper.TryUpdateServiceAsync());
+
         // Update yt-dlp once on startup
         await _ytdlpUpdater.TryUpdateYtdlpAsync();
 
         // Start checking for new downloadable items
         while (!stoppingToken.IsCancellationRequested)
         {
+            if (!await InstallationHealth.IsConfigAcceptableAsync())
+            {
+                _logger.Warning("Configuration is incomplete. Checking again in one minute.");
+                await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
+                continue;
+            }
+            
             _logger.Information("YoutubeDownloadService: Checking for youtube downloads at: {0}", DateTimeOffset.Now);
 
             // Process all playlists
@@ -41,63 +48,36 @@ public class YoutubeDownloadService : BackgroundService
             _logger.Information("YoutubeDownloaderService: Download session complete.");
 
 
-            // Check every hour
-            await Task.Delay(TimeSpan.FromHours(1), stoppingToken);
+            // Check 5 minutes
+            await Task.Delay(TimeSpan.FromMinutes(10), stoppingToken);
         }
     }
 
     private async Task ProcessAllPlaylists(CancellationToken stoppingToken)
-    {
-        // Converts paths with variables to actual paths and creates missing paths
-        Func<string, string> preparedOutputDir = (string inputPath) =>
-        {
-            // Replace variables
-            string outputPath = inputPath
-                .Replace("{Year}", DateTime.UtcNow.Year.ToString());
-
-            // Ensure trailing slash depending on OS
-            if (!outputPath.EndsWith(Path.DirectorySeparatorChar))
-                outputPath = outputPath + Path.DirectorySeparatorChar;
-
-            // Create missing directories
-            if (!Directory.Exists(outputPath))
-                Directory.CreateDirectory(outputPath);
-
-            return outputPath;
-        };
+    {        
+        // Get all playlists to process
+        List<PlaylistDownloadEntry> validPlaylists = (await DownloadSources.GetAsync())
+            .PlaylistDownloadEntries
+            .FindAll(x => x.Validate().IsValid);
 
         // Video playlists
-        foreach (var kvp in _config.VideoPlaylists)
+        foreach (var plEntry in validPlaylists)
         {
-            string playlistGuid = kvp.Key;
-            string outputDir = kvp.Value;
-
-            // Populate queue with tasks
-            List<YoutubeVideoInfo> videoToDownload =
-                await _youtubeSaveHelper.GetUndownloadedVideosAsync(playlistGuid);
-
-            await ProcessPlaylistAsync(
-                videoToDownload,
-                preparedOutputDir(outputDir),
-                "mp4",
-                stoppingToken);
-        }
-
-        // Music playlists
-        foreach (var kvp in _config.MusicPlaylists)
-        {
-            string playlistGuid = kvp.Key;
-            string outputDir = kvp.Value;
+            string formatString = plEntry.OutputAs switch
+            {
+                DownloadFormat.Audio => "mp3",
+                DownloadFormat.Video => "mp4",
+                _ => throw new ArgumentException("Impossible, download format error")
+            };
 
             // Populate queue with tasks
             List<YoutubeVideoInfo> videosToDownload =
-                await _youtubeSaveHelper.GetUndownloadedVideosAsync(playlistGuid);
+                await _youtubeSaveHelper.GetUndownloadedVideosAsync(plEntry.PlaylistId);
 
-            // Run task
             await ProcessPlaylistAsync(
                 videosToDownload,
-                preparedOutputDir(outputDir),
-                "mp3",
+                PathHelper.GetProcessedWildcardDirectory(plEntry.OutputDirectory),
+                formatString,
                 stoppingToken);
         }
     }
@@ -125,8 +105,7 @@ public class YoutubeDownloadService : BackgroundService
             _logger.Warning(
                 "Found {0} files which were already downloaded. Marking them as complete in the database.", 
                 alreadyDownloadedFiles.Count());
-            alreadyDownloadedFiles.ForEach(async x => 
-                await _youtubeQueries.MarkVideoAsDownloadedAsync(x));
+            await _youtubeQueries.MarkVideosAsDownloadedAsync(alreadyDownloadedFiles.ToArray());
 
             // Continue downloading the files we dont have yet
             var alreadyDownloadedVideoGuids = alreadyDownloadedFiles.Select(x => x.VideoGuid);
@@ -200,7 +179,7 @@ public class YoutubeDownloadService : BackgroundService
 
                     // Mark as downloaded in database
                     if (markAsComplete)
-                        await _youtubeQueries.MarkVideoAsDownloadedAsync(videoData);
+                        await _youtubeQueries.MarkVideosAsDownloadedAsync(videoData);
                 });
                 runningDownloaders.Add(dlTask);
             }

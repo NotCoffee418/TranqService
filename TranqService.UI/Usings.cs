@@ -1,0 +1,16 @@
+﻿global using System;
+global using System.ComponentModel;
+global using System.Linq.Expressions;
+global using TranqService.UI.Models.Context;
+global using System.Collections.Concurrent;
+global using TranqService.Common.Models.Configs;
+global using TranqService.Common.Abstract;
+global using static TranqService.Common.Data.Enums;
+global using System.Collections.Generic;
+global using TranqService.Common.Models;
+global using TranqService.Common.Data;
+global using WinForms = System.Windows.Forms;
+global using TranqService.UI.Converters;
+global using System.Globalization;
+global using System.Windows.Data;
+global using System.Windows;

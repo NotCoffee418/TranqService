@@ -354,3 +354,7 @@ appsettings.json
 *.sqlite
 *.sqlite-shm
 *.sqlite-wal
+
+# Deployer
+deployer/
+Output/

@@ -1,0 +1,73 @@
+name: Build, test and deploy
+
+on:
+  push:
+    branches:
+    - main
+
+jobs:
+  deploy:
+    # tests expect windows because of yt-dlp (for now)
+    # Installer compiler also requires windows
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 7.0.x
+        
+    - name: Restore dependencies
+      run: dotnet restore TranqService.sln
+      
+    - name: Build
+      run: dotnet build --no-restore TranqService.sln
+      
+    - name: Test
+      run: dotnet test --no-build --verbosity normal TranqService.sln
+
+    - name: Create Deployable builds
+      run: |
+        mkdir -p ${{ github.workspace }}/deployer/upload
+        dotnet publish TranqService/TranqService.csproj --os=win -c Release -o ./deployer/builds/win64/service
+        dotnet publish TranqService.UI/TranqService.UI.csproj --os=win -c Release -o ./deployer/builds/win64/ui
+
+    - name: Create Windows installer
+      uses: NotCoffee418/is-build-action@master
+      with:
+        path-to-script: create-windows-installer.iss
+        artifact-name: TranqServiceInstaller.exe
+
+    - name: Upload ZIP to S3 (Service - Windows)
+      uses: NotCoffee418/s3-zip-upload@v1
+      env:
+        AWS_SECRET_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        BUCKET_NAME: ${{ secrets.AWS_S3_BUCKET }}
+        AWS_REGION: eu-central-1
+        SOURCE_MODE: ZIP
+        SOURCE_PATH: ./deployer/builds/win64/service
+        DEST_FILE: service-windows-latest.zip
+
+    - name: Upload ZIP to S3 (UI - Windows)
+      uses: NotCoffee418/s3-zip-upload@v1
+      env:
+        AWS_SECRET_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        BUCKET_NAME: ${{ secrets.AWS_S3_BUCKET }}
+        AWS_REGION: eu-central-1
+        SOURCE_MODE: ZIP
+        SOURCE_PATH: ./deployer/builds/win64/ui
+        DEST_FILE: ui-windows-latest.zip
+
+    - name: Upload ZIP to S3 (Installer - Windows)
+      uses: NotCoffee418/s3-zip-upload@v1
+      env:
+        AWS_SECRET_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        BUCKET_NAME: ${{ secrets.AWS_S3_BUCKET }}
+        AWS_REGION: eu-central-1
+        SOURCE_MODE: FILE
+        SOURCE_PATH: TranqServiceInstaller.exe
+        DEST_FILE: TranqServiceInstaller.exe

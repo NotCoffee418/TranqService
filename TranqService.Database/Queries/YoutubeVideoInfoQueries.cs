@@ -1,4 +1,6 @@
 ﻿namespace TranqService.Database.Queries;
+
+[DependencyScope(Scope.Single)]
 public class YoutubeVideoInfoQueries : IYoutubeVideoInfoQueries
 {
     private IDb _db;
@@ -7,6 +9,8 @@ public class YoutubeVideoInfoQueries : IYoutubeVideoInfoQueries
     {
         _db = db;
     }
+
+    static SemaphoreSlim markVideosAsDownloadedSemaphore = new(1, 1);
 
     public async Task<List<string>> GetDownloadedVideoGuidsInPlaylistAsync(string playlistGuid)
     {
@@ -23,11 +27,23 @@ public class YoutubeVideoInfoQueries : IYoutubeVideoInfoQueries
     /// <param name="videoGuid"></param>
     /// <param name="playlistGuid"></param>
     /// <returns></returns>
-    public async Task MarkVideoAsDownloadedAsync(YoutubeVideoInfo videoInfo)
+    public async Task MarkVideosAsDownloadedAsync(params YoutubeVideoInfo[] videoInfos)
     {
-        using var context = _db.GetContext();
-        context.YoutubeVideoInfos.Add(videoInfo);
-        await context.SaveChangesAsync();
+        // Filter out double inserts
+        // Can happen on first run with duplicate items in a playlist
+        videoInfos = videoInfos
+            .DistinctBy(x => new { x.VideoGuid, x.PlaylistGuid })
+            .ToArray();
+
+        // This was causing some errors since .NET 7, no info about it yet, semaphore should fix
+        await markVideosAsDownloadedSemaphore.WaitAsync();
+        try
+        {
+            using var context = _db.GetContext();
+            context.YoutubeVideoInfos.AddRange(videoInfos);
+            await context.SaveChangesAsync();
+        }
+        finally { markVideosAsDownloadedSemaphore.Release(); }        
     }
 
     public async Task<int> CountDownloadedVideosAsync()
@@ -36,4 +52,5 @@ public class YoutubeVideoInfoQueries : IYoutubeVideoInfoQueries
         return await context.YoutubeVideoInfos
             .CountAsync();
     }
+
 }

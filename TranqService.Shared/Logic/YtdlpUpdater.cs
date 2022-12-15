@@ -1,4 +1,5 @@
 ﻿using System.IO.Compression;
+using TranqService.Common.DataAccess;
 using TranqService.Shared.DataAccess.Ytdlp;
 
 namespace TranqService.Shared.Logic;
@@ -7,20 +8,17 @@ namespace TranqService.Shared.Logic;
 public class YtdlpUpdater : IYtdlpUpdater
 {
     private IYtdlpPaths _ytdlpPaths;
-    private IPathHelper _pathHelper;
     private IGithubAccess _githubAccess;
     private ILogger _logger;
     private IYtdlpInterop _ytdlpInterop;
 
     public YtdlpUpdater(
         IYtdlpPaths ytdlpPaths,
-        IPathHelper pathHelper,
         IGithubAccess githubAccess,
         ILogger logger,
         IYtdlpInterop ytdlpInterop)
     {
         _ytdlpPaths = ytdlpPaths;
-        _pathHelper = pathHelper;
         _githubAccess = githubAccess;
         _logger = logger;
         _ytdlpInterop = ytdlpInterop;
@@ -83,7 +81,7 @@ public class YtdlpUpdater : IYtdlpUpdater
     private async Task InstallFfmpegAsync()
     {
         string sourceUrl = "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl.zip";
-        string zipSavePath = _pathHelper.GetAppdataPath(true, "ffmpeg-build.zip");
+        string zipSavePath = PathHelper.GetAppdataPath(true, "ffmpeg-build.zip");
         string binOutputDir = Path.GetDirectoryName(_ytdlpPaths.GetYtdlpExePath());
 
         try

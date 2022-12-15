@@ -1,6 +1,6 @@
 using TranqService.Shared.DataAccess.ApiHandlers;
 
-namespace TranqService.Tests.Ytdlp.DataAccess;
+namespace TranqService.Tests.Shared.DataAccess;
 
 public class GithubAccessTests
 {

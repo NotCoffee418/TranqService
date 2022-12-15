@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net7.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+	<UseWindowsForms>true</UseWindowsForms>
+	<EnableWindowsTargeting>true</EnableWindowsTargeting>
+
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ModernWpfUI" Version="0.9.6" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TranqService.Common\TranqService.Common.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -11,3 +11,5 @@ global using TranqService.Common.Extensions;
 global using System.ComponentModel.DataAnnotations;
 global using TranqService.Database.Models;
 global using Microsoft.EntityFrameworkCore.Design;
+global using TranqService.Common.Attributes;
+global using static TranqService.Common.Attributes.DependencyScopeAttribute;

@@ -2,23 +2,20 @@
 
 public class YoutubeApiHandler : IYoutubeApiHandler
 {
-    IConfig _config;
-
     private YouTubeService? _youTubeService;
 
-    public YoutubeApiHandler(IConfig config)
+    public YoutubeApiHandler()
     {
-        _config = config;
 
         Authenticate();
     }
-
+    
     private void Authenticate()
     {
         _youTubeService = new YouTubeService(new BaseClientService.Initializer()
         {
             ApplicationName = this.GetType().ToString(),
-            ApiKey = _config.YoutubeApiKey
+            ApiKey = ApiKeys.Get().YoutubeApiKey
         });
     }
 
