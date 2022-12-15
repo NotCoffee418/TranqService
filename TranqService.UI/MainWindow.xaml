@@ -11,7 +11,7 @@
         xmlns:ui="http://schemas.modernwpf.com/2019"
         ui:WindowHelper.UseModernWindowStyle="True"
         ui:ThemeManager.IsThemeAware="True"
-        Title="MainWindow" Height="780" Width="978"
+        Title="TranqService Configuration" Height="780" Width="978"
         Background="Black"
         Loaded="Window_Loaded">
     <Window.Resources>
@@ -383,8 +383,20 @@
                             HorizontalAlignment="Stretch"/>
                         </StackPanel>
                     </GroupBox>
-                    <Button Content="Save" IsEnabled="{Binding CanSave}" Grid.Row="2" Width="128" Padding="10" Background="DarkGreen" Click="AdvancedSettingsSave_Click" />
-                    <Button Content="Open data directory" Grid.Row="3" Margin="0,0,32,32" VerticalAlignment="Bottom" HorizontalAlignment="Right" Click="OpenDataDirectory_Click"/>
+                   <Grid Grid.Row="3" Margin="10,5" VerticalAlignment="Bottom" HorizontalAlignment="Stretch">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                       
+                        <Button Content="Save" IsEnabled="{Binding CanSave}" Grid.Row="2" Width="128" Padding="10" Background="DarkGreen" Click="AdvancedSettingsSave_Click" />
+
+                        <StackPanel Grid.Column="1" Orientation="Horizontal">
+                            <Button Grid.Column="0" Margin="0,0,40,0" Content="Open data directory" Click="OpenDataDirectory_Click"/>
+                            <Button  Margin="0,0,10,0" Content="Start Service" Click="StartService_Click" />
+                            <Button Content="Stop Service" Click="StopService_Click" />
+                        </StackPanel>
+                    </Grid>
                 </Grid>
             </TabItem>
         </TabControl>

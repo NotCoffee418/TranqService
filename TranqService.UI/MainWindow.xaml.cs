@@ -166,6 +166,52 @@ namespace TranqService.UI
         
         private void OpenDataDirectory_Click(object sender, RoutedEventArgs e)
             => Process.Start("explorer.exe", PathHelper.GetAppdataPath(false));
+        private void StartService_Click(object sender, RoutedEventArgs e)
+        {
+            if (InstallHelper.IsServiceRunning())
+            {
+                MessageBox.Show("Service was already running. No action taken.", 
+                    "Service already running", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            try
+            {
+                (e.Source as Button).IsEnabled = false;
+                Task.Delay(5000).ContinueWith(task => Application.Current.Dispatcher.Invoke(new Action(() =>
+                 {
+                     (e.Source as Button).IsEnabled = true;
+                 })));
+                Process.Start(System.IO.Path.Combine(PathHelper.GetServiceDeployDirectory(), "TranqService.exe"));
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "An error has occurred starting the service", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void StopService_Click(object sender, RoutedEventArgs e)
+        {
+            var serviceProcesses = InstallHelper.GetServiceProcesses();
+            int foundRunningProcesses = serviceProcesses.Length;
+            if (foundRunningProcesses == 0)
+            {
+                MessageBox.Show("Service was not running. No action taken.",
+                "Service not running", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+            
+            (e.Source as Button).IsEnabled = false;
+            Task.Delay(5000).ContinueWith(task => Application.Current.Dispatcher.Invoke(new Action(() =>
+            {
+                (e.Source as Button).IsEnabled = true;
+            })));
+            
+            foreach (var p in serviceProcesses)
+                p.Kill();
+            return;
+        }
+
 
         private void SetupSave_Click(object sender, RoutedEventArgs e)
         {

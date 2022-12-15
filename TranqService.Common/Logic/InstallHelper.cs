@@ -27,11 +27,19 @@ public static class InstallHelper
     public static bool DoesServiceStartOnBoot() // todo: linux support
         => Registry.GetValue(RegistryStartupFolder, RegistryStartupKey, null) is null;
 
+    public static Process[] GetServiceProcesses()
+        => Process.GetProcessesByName("TranqService")
+        .Where(x => !x.ProcessName.Contains(".Ui"))
+        .ToArray();
+
+    public static Process[] GetUiProcesses()
+        => Process.GetProcessesByName("TranqService.Ui");
+
     public static bool IsServiceRunning()
-        => System.Diagnostics.Process.GetProcessesByName("TranqService").Length > 0;
+        => GetServiceProcesses().Length > 0;
 
     public static bool IsUiRunning()
-        => System.Diagnostics.Process.GetProcessesByName("TranqService.Ui").Length > 0;
+        => GetUiProcesses().Length > 0;
 
     /// <summary>
     /// Should not be called from service. Will close Service instantly if there is an update.
@@ -45,7 +53,7 @@ public static class InstallHelper
         if (!await VersionAccess.IsServiceUpdateAvailableAsync()) return;
 
         // Service is allowed to be shut down
-        var processes = Process.GetProcessesByName("TranqService.Ui");
+        var processes = GetServiceProcesses();
         int foundRunningProcesses = processes.Length;
         if (foundRunningProcesses > 0)
             foreach (var p in processes)
@@ -54,11 +62,11 @@ public static class InstallHelper
         // Download update and install it
         await InstallUpdateAsync(
             AppConstants.LatestServiceVersionUrl,
-            PathHelper.GetUiDeployDirectory());
+            PathHelper.GetServiceDeployDirectory());
 
         // Restart service if it was running
         if (foundRunningProcesses > 0)
-            Process.Start(Path.Combine(PathHelper.GetUiDeployDirectory(), "TranqService.exe"));
+            Process.Start(Path.Combine(PathHelper.GetServiceDeployDirectory(), "TranqService.exe"));
     }
 
     /// <summary>
@@ -71,7 +79,7 @@ public static class InstallHelper
         if (!await VersionAccess.IsServiceUpdateAvailableAsync()) return;
 
         // Service is allowed to be shut down
-        while (Process.GetProcessesByName("TranqService.Ui").Length > 0)
+        while (GetUiProcesses().Length > 0)
             await Task.Delay(TimeSpan.FromMinutes(5));
 
         // Download update and install it
