@@ -154,8 +154,6 @@
                                                         <RowDefinition Height="Auto"/>
                                                         <RowDefinition Height="Auto"/>
                                                         <RowDefinition Height="Auto"/>
-                                                        <RowDefinition Height="Auto"/>
-                                                        <RowDefinition Height="Auto"/>
                                                     </Grid.RowDefinitions>
 
                                                     <!-- Playlist Description -->
@@ -244,14 +242,14 @@
 
                     </GroupBox>
                     <Button 
-                    Grid.Row="3"
-                    Background="DarkGreen" 
-                    Width="128"
-                    Padding="10"
-                    Margin="20,0,0,20"
-                    Content="Save Changes" 
-                    IsEnabled="{Binding CanSave}" 
-                    Click="DownloadSourcesSave_Click" />
+                        Grid.Row="3"
+                        Background="DarkGreen" 
+                        Width="128"
+                        Padding="10"
+                        Margin="20,0,0,0"
+                        Content="Save Changes" 
+                        IsEnabled="{Binding CanSave}" 
+                        Click="DownloadSourcesSave_Click" />
                 </Grid>
             </TabItem>
 
@@ -358,6 +356,30 @@
 
             </TabItem>
 
+
+            <TabItem Header="Failed Downloads" DataContext="{Binding FailedDownloadsContext}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <DataGrid Grid.Row="0" AutoGenerateColumns="False" ItemsSource="{Binding FailedDownloadsDataView}" IsReadOnly="True">
+
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn Header="URL">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button Content="Copy Url" Click="CopyTagToClipboard_Click" Tag="{Binding VideoUrl}" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="Video Name" Binding="{Binding VideoName}" />                            
+                            <DataGridTextColumn Header="Error Message" Binding="{Binding ErrorMessage}" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+
             <TabItem Header="Advanced" DataContext="{Binding AdvancedOptionsContext}">
                 <Grid Margin="20">
                     <Grid.RowDefinitions>
@@ -423,6 +445,7 @@
                     </Grid>
                 </Grid>
             </TabItem>
+
         </TabControl>
 
         <Grid Grid.Row="1">

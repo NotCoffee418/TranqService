@@ -20,6 +20,7 @@ using System.IO;
 using TranqService.Common.Logic;
 using TranqService.Database;
 using TranqService.Database.Queries;
+using TranqService.UI.Models;
 
 namespace TranqService.UI
 {
@@ -47,12 +48,13 @@ namespace TranqService.UI
 
         private void InitContext()
         {
-            
+
             FullContext = new()
             {
                 AdvancedOptionsContext = new(),
                 SetupContext = new(),
                 PlaylistSetupContext = new(),
+                FailedDownloadsContext = new()
             };
             DataContext = FullContext;
         }
@@ -63,6 +65,7 @@ namespace TranqService.UI
             UpdateConfigValidityIndicators();
             UpdateService();
             BackgroundWatchServiceState();
+            ReloadFailedDownloadsData();
         }
 
         private void RefreshPlaylists()
@@ -165,7 +168,18 @@ namespace TranqService.UI
             return result == WinForms.DialogResult.OK ?
                 (true, fbd.SelectedPath) : (false, null);
         }
-        
+
+        private void ReloadFailedDownloadsData()
+        {
+            var ytQueries = new YoutubeVideoInfoQueries(new Db());
+            ytQueries.GetErroredVideosAsync()
+                .ContinueWith(task => Application.Current.Dispatcher.Invoke(new Action(() =>
+                {
+                    List<FailedDatatableModel> dtData = task.Result.Select(x => new FailedDatatableModel(x)).ToList();
+                    FullContext.FailedDownloadsContext.FailedDownloadsDataView = dtData;
+                })));
+        }
+
         private void OpenDataDirectory_Click(object sender, RoutedEventArgs e)
             => Process.Start("explorer.exe", PathHelper.GetAppdataPath(false));
         private void StartService_Click(object sender, RoutedEventArgs e)
@@ -345,6 +359,12 @@ namespace TranqService.UI
             }
         }
 
+        private void CopyTagToClipboard_Click(object sender, RoutedEventArgs e)
+        {
+            string url = (e.OriginalSource as Button).Tag.ToString();
+            if (string.IsNullOrEmpty(url)) return;
+            Clipboard.SetText(url);
+        }
 
         private void ResetYoutubePlaylist_Click(object sender, RoutedEventArgs e)
         {
