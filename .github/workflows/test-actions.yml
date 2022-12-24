@@ -3,7 +3,6 @@ name: Build and test
 on:
   pull_request:
     branches:  
-    - main
     - dev
   push:
     branches:
