@@ -364,8 +364,15 @@
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
                     <DataGrid Grid.Row="0" AutoGenerateColumns="False" ItemsSource="{Binding FailedDownloadsDataView}" IsReadOnly="True">
-
                         <DataGrid.Columns>
+                            <DataGridTemplateColumn Header="Retry">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button Content="Queue Retry" Click="RetryFailedDownload_Click" Tag="{Binding}"
+                                                ToolTip="Will attempt to re-download this video next iteration."/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
                             <DataGridTemplateColumn Header="URL">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
@@ -373,7 +380,7 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTextColumn Header="Video Name" Binding="{Binding VideoName}" />                            
+                            <DataGridTextColumn Header="Video Name" Binding="{Binding VideoName}" />
                             <DataGridTextColumn Header="Error Message" Binding="{Binding ErrorMessage}" />
                         </DataGrid.Columns>
                     </DataGrid>

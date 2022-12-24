@@ -12,9 +12,13 @@ public class FailedDatatableModel
         VideoName = ytVideoInfo.Name;
         VideoUrl = $"https://youtu.be/playlist?list={ytVideoInfo.PlaylistGuid}&v={ytVideoInfo.VideoGuid}";
         ErrorMessage = ytVideoInfo.ErrorMessage;
+        PlaylistId = ytVideoInfo.PlaylistGuid;
+        VideoId = ytVideoInfo.VideoGuid;
     }
 
     public string VideoName { get; }
     public string VideoUrl { get; }
     public string ErrorMessage { get; }
+    public string PlaylistId { get; }
+    public string VideoId { get; }
 }
