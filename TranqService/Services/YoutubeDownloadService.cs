@@ -31,7 +31,7 @@ public class YoutubeDownloadService : BackgroundService
         CloseOtherServiceProcesses();
 
         // Check for UI updates. Can be long running task since it waits for user to close UI if it's open.
-        _ = Task.Run(async () => await InstallHelper.TryUpdateServiceAsync());
+        _ = Task.Run(async () => await InstallHelper.TryUpdateUiAsync());
 
         // Update yt-dlp once on startup
         await _ytdlpUpdater.TryUpdateYtdlpAsync();
