@@ -53,14 +53,17 @@ public static class VersionAccess
         await vInfo.SaveAsync();
         VersionUpdateSemaphore.Release();
     }
-    
+
     private static async Task<DateTime?> GetRemoteFileVersionTime(string url)
     {
         try
         {
-            HttpResponseMessage resp = await AppConstants.HTTPCLIENT.GetAsync(
-                url, HttpCompletionOption.ResponseHeadersRead);
-            
+            // Make a HEAD request to the S3 API to retrieve the metadata for the object.
+            // This should be a costless operation, unlike a GET request.
+            HttpResponseMessage resp = await AppConstants.HTTPCLIENT.SendAsync(
+                new HttpRequestMessage(HttpMethod.Head, url),
+                HttpCompletionOption.ResponseHeadersRead);
+
             if (!resp.IsSuccessStatusCode || resp.Content.Headers.LastModified is null)
                 return null;
 
@@ -71,7 +74,4 @@ public static class VersionAccess
             return null;
         }
     }
-
-    
-    
 }

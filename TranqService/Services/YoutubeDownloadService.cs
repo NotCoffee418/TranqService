@@ -31,7 +31,8 @@ public class YoutubeDownloadService : BackgroundService
         CloseOtherServiceProcesses();
 
         // Check for UI updates. Can be long running task since it waits for user to close UI if it's open.
-        _ = Task.Run(async () => await InstallHelper.TryUpdateUiAsync());
+        _ = Task.Run(async () => await WatchForUiUpdatesAsync(stoppingToken));
+        
 
         // Update yt-dlp once on startup
         await _ytdlpUpdater.TryUpdateYtdlpAsync();
@@ -66,6 +67,20 @@ public class YoutubeDownloadService : BackgroundService
             // Check 5 minutes
             await Task.Delay(TimeSpan.FromMinutes(10), stoppingToken);
         }
+    }
+
+    /// <summary>
+    /// Should be run as a background task alongside the main service
+    /// </summary>
+    /// <returns></returns>
+    private async Task WatchForUiUpdatesAsync(CancellationToken stoppingToken)
+    {
+        TimeSpan repeatInterval = TimeSpan.FromMinutes(10);
+        do
+        {
+            await InstallHelper.TryUpdateUiAsync();
+            await Task.Delay(repeatInterval, stoppingToken);
+        } while (!stoppingToken.IsCancellationRequested);
     }
 
     private async Task ProcessAllPlaylists(CancellationToken stoppingToken)
