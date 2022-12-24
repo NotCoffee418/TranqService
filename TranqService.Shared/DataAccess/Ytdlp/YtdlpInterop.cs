@@ -1,6 +1,4 @@
-﻿using System.Text.RegularExpressions;
-
-namespace TranqService.Shared.DataAccess.Ytdlp;
+﻿namespace TranqService.Shared.DataAccess.Ytdlp;
 
 public class YtdlpInterop : IYtdlpInterop
 {
@@ -9,11 +7,15 @@ public class YtdlpInterop : IYtdlpInterop
 
     public YtdlpInterop(
         IYtdlpPaths ytdlpPaths,
+        IPolicyFactory policyFactory,
         ILogger logger)
     {
         _ytdlpPaths = ytdlpPaths;
         _logger = logger;
+        DownloadRetryPolicy = policyFactory.GetRetryPolicy(nameof(YtdlpInterop), 5, 10000);
     }
+
+    AsyncRetryPolicy DownloadRetryPolicy { get; init; }
 
     const string VideoFormatData = "-f \"bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best\" --prefer-ffmpeg --add-metadata --embed-thumbnail --metadata-from-title \"%(artist)s - %(title)s\" --no-warnings";
     const string AudioFormatData = "-x --audio-format mp3 --prefer-ffmpeg --add-metadata --embed-thumbnail --metadata-from-title \"%(artist)s - %(title)s\" --no-warnings";
@@ -70,7 +72,8 @@ public class YtdlpInterop : IYtdlpInterop
         // Set working directory (required for ffmpeg)
         // Also helps with linux support
         string args = $"{formatData} -o \"{outputFile}\" {inputUrl}";
-        try
+
+        PolicyResult<string> requestAttempt = await DownloadRetryPolicy.ExecuteAndCaptureAsync(async () =>
         {
             string outputStr = await RunCommandAsync(workingDir, ytdlpExe, args);
 
@@ -81,26 +84,29 @@ public class YtdlpInterop : IYtdlpInterop
             // ..
             // Additional validation should go here
 
-        }
-        catch (Exception ex)
-        {
+            // Return output string to method context
+            return outputStr;
+        });
 
+        if (requestAttempt.Outcome == OutcomeType.Failure)
+        {
             // Cleanup on fail
             if (File.Exists(outputFile))
                 File.Delete(outputFile);
-            _logger.Error(ex.Message, ex);
+            _logger.Error(requestAttempt.FinalException.Message, requestAttempt.FinalException);
 
             // Attempt to extract a clean error
-            string errorMessage = ex.Message;
-            if (ex.Message.Contains("ERROR:"))
+            string errorMessage = requestAttempt.FinalException.Message;
+            if (requestAttempt.FinalException.Message.Contains("ERROR:"))
             {
-                errorMessage = ex.Message.Split(Environment.NewLine)
+                errorMessage = requestAttempt.FinalException.Message.Split(Environment.NewLine)
                     .Where(x => x.Contains("ERROR:"))
                     .First().Trim();
             }
             return (false, errorMessage);
         }
-        return (true, null);
+        else return (true, null);
+
     }
 
     private async Task<(bool Success, string ErrorMessage)> RunFfmpegCommand(string args)
