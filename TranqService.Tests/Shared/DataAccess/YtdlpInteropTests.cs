@@ -10,7 +10,7 @@ public class YtdlpInteropTests
     const string TestBrokenUrl = "https://www.youtube.com/watch?v=NotARealId";
 
 
-    [Fact]
+    [Fact(Skip = "This doesn't run from github with http error 'forbidden'")]
     public async Task DownloadVideo_WorkingVideo_ManuallyValidate()
     {
         using var mock = AutoMock.GetLoose(builder => builder.AddMocked());
