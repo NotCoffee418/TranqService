@@ -21,6 +21,7 @@ using TranqService.Common.Logic;
 using TranqService.Database;
 using TranqService.Database.Queries;
 using TranqService.UI.Models;
+using TranqService.Database.Models;
 
 namespace TranqService.UI
 {
@@ -178,6 +179,16 @@ namespace TranqService.UI
                     List<FailedDatatableModel> dtData = task.Result.Select(x => new FailedDatatableModel(x)).ToList();
                     FullContext.FailedDownloadsContext.FailedDownloadsDataView = dtData;
                 })));
+        }
+
+        private void RetryFailedDownload_Click(object sender, RoutedEventArgs e)
+        {
+            var ytQueries = new YoutubeVideoInfoQueries(new Db());
+            var btnRef = (Button)sender;
+            btnRef.IsEnabled = false;
+            FailedDatatableModel failData = (FailedDatatableModel)btnRef.Tag;
+            ytQueries.RequeueVideoAsync(failData.VideoId, failData.PlaylistId).Wait();
+            ReloadFailedDownloadsData();
         }
 
         private void OpenDataDirectory_Click(object sender, RoutedEventArgs e)

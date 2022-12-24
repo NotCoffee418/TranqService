@@ -84,12 +84,16 @@ public class YoutubeVideoInfoQueries : IYoutubeVideoInfoQueries
             .ToArrayAsync();
     }
 
-    public async Task RemoveErrorFromVideo(YoutubeVideoInfo vinfo)
+    public async Task RequeueVideoAsync(string videoGuid, string playlistGuid)
     {
         using var context = _db.GetContext();
-        context.Attach(vinfo);
-        vinfo.ErrorMessage = null;
-        context.Entry(vinfo).Property(p => p.ErrorMessage).IsModified = true;
-        await context.SaveChangesAsync();
+        var videoToDelete = context.YoutubeVideoInfos.FirstOrDefault(v => 
+            v.VideoGuid == videoGuid && v.PlaylistGuid == playlistGuid);
+        if (videoToDelete != null)
+        {
+            context.YoutubeVideoInfos.Remove(videoToDelete);
+            await context.SaveChangesAsync();
+        }
+        
     }
 }
