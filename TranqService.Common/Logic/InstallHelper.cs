@@ -50,7 +50,8 @@ public static class InstallHelper
     public static async Task TryUpdateServiceAsync()
     {
         // Do nothing if no update
-        if (!await VersionAccess.IsServiceUpdateAvailableAsync()) return;
+        (bool hasUpdate, DateTime? latestVersionTime) = await VersionAccess.IsServiceUpdateAvailableAsync();
+        if (!hasUpdate) return;
 
         // Service is allowed to be shut down
         var processes = GetServiceProcesses();
@@ -64,6 +65,9 @@ public static class InstallHelper
             AppConstants.LatestServiceVersionUrl,
             PathHelper.GetServiceDeployDirectory());
 
+        // Update version
+        await VersionAccess.UpdateServiceVersionAsync(latestVersionTime.Value);
+
         // Restart service if it was running
         if (foundRunningProcesses > 0)
             Process.Start(Path.Combine(PathHelper.GetServiceDeployDirectory(), "TranqService.exe"));
@@ -76,7 +80,8 @@ public static class InstallHelper
     public static async Task TryUpdateUiAsync()
     {
         // Do nothing if no update
-        if (!await VersionAccess.IsServiceUpdateAvailableAsync()) return;
+        (bool hasUpdate, DateTime? latestVersionTime) = await VersionAccess.IsUiUpdateAvailableAsync();
+        if (!hasUpdate) return;
 
         // Service is allowed to be shut down
         while (GetUiProcesses().Length > 0)
@@ -84,8 +89,11 @@ public static class InstallHelper
 
         // Download update and install it
         await InstallUpdateAsync(
-            AppConstants.LatestServiceVersionUrl,
+            AppConstants.LatestUiVersionUrl,
             PathHelper.GetUiDeployDirectory());
+
+        // Update version
+        await VersionAccess.UpdateUiVersionAsync(latestVersionTime.Value);
     }
 
 
@@ -101,8 +109,11 @@ public static class InstallHelper
         string zipPath = Path.GetTempFileName();
         try
         {
+            // Prevent concurrent temp paths existing
+            while (File.Exists(zipPath)) zipPath = zipPath + "_";
+
             // Download update
-            using (var s = await AppConstants.HTTPCLIENT.GetStreamAsync(AppConstants.LatestServiceVersionUrl))
+            using (var s = await AppConstants.HTTPCLIENT.GetStreamAsync(url))
                 using (var fs = new FileStream(zipPath, FileMode.CreateNew))
                     await s.CopyToAsync(fs);
 
@@ -116,6 +127,11 @@ public static class InstallHelper
 
             // Extract the zip file to the destination folder
             ZipFile.ExtractToDirectory(zipPath, deployProgramDir, true);
+
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"There was an error updating to '{deployProgramDir}'. " + ex.Message);
         }
         finally
         {

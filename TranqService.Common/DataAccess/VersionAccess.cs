@@ -2,18 +2,24 @@
 
 public static class VersionAccess
 {
-    public static async Task<bool> IsServiceUpdateAvailableAsync()
+    static SemaphoreSlim VersionUpdateSemaphore { get; } = new SemaphoreSlim(1, 1);
+
+    public static async Task<(bool HasUpdate, DateTime? VersionTime)> IsServiceUpdateAvailableAsync()
     {
         var latestVersionT = GetRemoteServiceVersionTimeAsync();
         var localVersionT = GetInstalledServiceVersionTimeAsync();
-        return await latestVersionT > await localVersionT;
+        return (latestVersionT is not null && 
+            (await localVersionT is null || await latestVersionT > await localVersionT), 
+            await latestVersionT);
     }
 
-    public static async Task<bool> IsUiUpdateAvailableAsync()
+    public static async Task<(bool HasUpdate, DateTime? VersionTime)> IsUiUpdateAvailableAsync()
     {
         var latestVersionT = GetRemoteUiVersionTimeAsync();
         var localVersionT = GetInstalledUiVersionTimeAsync();
-        return await latestVersionT > await localVersionT;
+        return (await latestVersionT is not null && 
+            (await localVersionT is null || await latestVersionT > await localVersionT), 
+            await latestVersionT);
     }
 
     public static Task<DateTime?> GetRemoteServiceVersionTimeAsync()
@@ -26,8 +32,28 @@ public static class VersionAccess
         => (await AppVersionInfo.GetAsync()).InstalledServiceVersionTime;
     
     public static async Task<DateTime?> GetInstalledUiVersionTimeAsync()
-        => (await AppVersionInfo.GetAsync()).InstalledServiceVersionTime;
+        => (await AppVersionInfo.GetAsync()).InstalledUiVersionTime;
 
+
+    public static async Task UpdateUiVersionAsync(DateTime versionTime)
+    {
+        await VersionUpdateSemaphore.WaitAsync();
+        AppVersionInfo vInfo = await AppVersionInfo.GetAsync();
+        vInfo.InstalledUiVersionTime = versionTime;
+        await vInfo.SaveAsync();
+        VersionUpdateSemaphore.Release();
+    }
+
+
+    public static async Task UpdateServiceVersionAsync(DateTime versionTime)
+    {
+        await VersionUpdateSemaphore.WaitAsync();
+        AppVersionInfo vInfo = await AppVersionInfo.GetAsync();
+        vInfo.InstalledServiceVersionTime = versionTime;
+        await vInfo.SaveAsync();
+        VersionUpdateSemaphore.Release();
+    }
+    
     private static async Task<DateTime?> GetRemoteFileVersionTime(string url)
     {
         try
@@ -45,6 +71,7 @@ public static class VersionAccess
             return null;
         }
     }
+
     
     
 }
