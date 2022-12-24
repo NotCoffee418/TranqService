@@ -85,7 +85,7 @@ public static class InstallHelper
 
         // Service is allowed to be shut down
         while (GetUiProcesses().Length > 0)
-            await Task.Delay(TimeSpan.FromMinutes(5));
+            await Task.Delay(TimeSpan.FromSeconds(5));
 
         // Download update and install it
         await InstallUpdateAsync(
