@@ -1,6 +1,8 @@
+using Discord;
 using System.Globalization;
 using System.Net;
 using TranqService.Common.Logic;
+using TranqService.Shared.DataAccess.ApiHandlers;
 
 namespace TranqService.Services;
 public class YoutubeDownloadService : BackgroundService
@@ -10,19 +12,22 @@ public class YoutubeDownloadService : BackgroundService
     private readonly IYoutubeVideoInfoQueries _youtubeQueries;
     private readonly IYtdlpUpdater _ytdlpUpdater;
     private readonly IYtdlpInterop _ytdlp;
+    private readonly IYoutubeApiHandler _ytApiHandler;
 
     public YoutubeDownloadService(
         Serilog.ILogger logger,
         IPlaylistHelper youtubeSaveHelper,
         IYoutubeVideoInfoQueries youtubeQueries,
         IYtdlpUpdater ytdlpUpdater,
-        IYtdlpInterop ytdlp)
+        IYtdlpInterop ytdlp,
+        IYoutubeApiHandler ytApiHandler)
     {
         _logger = logger;
         _youtubeSaveHelper = youtubeSaveHelper;
         _youtubeQueries = youtubeQueries;
         _ytdlpUpdater = ytdlpUpdater;
         _ytdlp = ytdlp;
+        _ytApiHandler = ytApiHandler;
     }
 
     /// <summary>
@@ -121,6 +126,7 @@ public class YoutubeDownloadService : BackgroundService
             .FindAll(x => x.Validate().IsValid);
 
         // Video playlists
+        DateTime namesExpiredBefore = DateTime.UtcNow.AddDays(-3);
         foreach (var plEntry in validPlaylists)
         {
             try
@@ -135,6 +141,15 @@ public class YoutubeDownloadService : BackgroundService
                 // Populate queue with tasks
                 List<YoutubeVideoInfo> videosToDownload =
                     await _youtubeSaveHelper.GetUndownloadedVideosAsync(plEntry.PlaylistId);
+                
+                // Fetch display name for playlist
+                if (string.IsNullOrEmpty(plEntry.DisplayName) || plEntry.DisplayName == "Loading..." || plEntry.LastDisplayNameCheck < namesExpiredBefore)
+                {
+                    var plInfo = await _ytApiHandler.GetPlaylistInfoAsync(plEntry.PlaylistId);
+                    await plEntry.SetDisplayNameAsync(plInfo.IsValid ? plInfo.Name : null);
+                    if (!plInfo.IsValid)
+                        throw new Exception("Failed to get playlist info: " + plInfo.ErrorMessage);
+                }
 
                 // Process the playlist
                 await ProcessPlaylistAsync(
@@ -142,15 +157,15 @@ public class YoutubeDownloadService : BackgroundService
                     PathHelper.GetProcessedWildcardDirectory(plEntry.OutputDirectory),
                     formatString,
                     stoppingToken);
-
+                
                 // Reset any error notifications if a problem was resoved
                 if (!string.IsNullOrEmpty(plEntry.PlaylistError))
-                    await plEntry.SetPlaylistAsError(null);
+                    plEntry.PlaylistError = null;
             }
             catch (Exception ex)
             {
                 _logger.Error("Skipping playlist due to error: " + ex.Message);
-                await plEntry.SetPlaylistAsError(ex.Message);
+                plEntry.PlaylistError = ex.Message;
             }
         }
     }

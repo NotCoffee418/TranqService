@@ -1,4 +1,6 @@
-﻿namespace TranqService.Common.Models;
+﻿using System.Text.Json.Serialization;
+
+namespace TranqService.Common.Models;
 
 /// <summary>
 /// Used by config. Should not changed or configs will break
@@ -51,9 +53,24 @@ public class PlaylistDownloadEntry : NotificationObject
     /// Indicates that this playlist had an error last attempt.
     /// Define through SetPlaylistAsError().
     /// </summary>
-    public string? PlaylistError { get; set; } = null;
+    public string? PlaylistError
+    {
+        get => Get<string?>(nameof(PlaylistError), null);
+        set => Set(nameof(PlaylistError), value);
+    }
 
+    [JsonIgnore]
     public bool HasError { get => !string.IsNullOrEmpty(PlaylistError); }
+    public string? DisplayName
+    {
+        get => Get<string?>(nameof(DisplayName), "Loading...");
+        set => Set(nameof(DisplayName), value);
+    }
+    public DateTime LastDisplayNameCheck
+    {
+        get => Get<DateTime>(nameof(LastDisplayNameCheck), DateTime.UtcNow);
+        set => Set(nameof(LastDisplayNameCheck), value);
+    }
 
     /// <summary>
     /// Check if the config has any obvious errors. 
@@ -91,20 +108,30 @@ public class PlaylistDownloadEntry : NotificationObject
     /// </summary>
     /// <param name="error"></param>
     /// <returns></returns>
-    public async Task SetPlaylistAsError(string error)
+    public async Task SetPlaylistAsErrorAsync(string error)
+    {
+        this.PlaylistError = error;
+        await UpdateSingleEntryAsync();
+    }
+
+    public async Task SetDisplayNameAsync(string displayName)
+    {
+        this.DisplayName = displayName;
+        this.LastDisplayNameCheck = displayName == null ? DateTime.MinValue : DateTime.UtcNow;
+        await UpdateSingleEntryAsync();
+    }
+
+    private async Task UpdateSingleEntryAsync()
     {
         // Load current config and modify that
         DownloadSources dls = await DownloadSources.GetAsync(forceReload: true);
         for (int i = 0; i < dls.PlaylistDownloadEntries.Count; i++) // lazy search
             if (dls.PlaylistDownloadEntries[i].PlaylistId == this.PlaylistId)
             {
-                dls.PlaylistDownloadEntries[i].PlaylistError = error;
+                dls.PlaylistDownloadEntries[i] = this;
                 break;
             }
         await dls.SaveAsync();
-
-        // Also set own instance as error
-        this.PlaylistError = error;
     }
 
     /// <summary>

@@ -71,6 +71,7 @@ namespace TranqService.UI
 
         private void RefreshPlaylists()
         {
+            // Refresh
             PlaylistEntriesItemControl.ItemsSource = null;
             PlaylistEntriesItemControl.ItemsSource = FullContext.PlaylistSetupContext.PlaylistDownloadEntries;
         }

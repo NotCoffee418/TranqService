@@ -1,4 +1,6 @@
-﻿namespace TranqService.Shared.DataAccess.ApiHandlers;
+﻿using static Google.Apis.Requests.BatchRequest;
+
+namespace TranqService.Shared.DataAccess.ApiHandlers;
 
 public class YoutubeApiHandler : IYoutubeApiHandler
 {
@@ -6,10 +8,9 @@ public class YoutubeApiHandler : IYoutubeApiHandler
 
     public YoutubeApiHandler()
     {
-
         Authenticate();
     }
-    
+
     private void Authenticate()
     {
         _youTubeService = new YouTubeService(new BaseClientService.Initializer()
@@ -54,6 +55,24 @@ public class YoutubeApiHandler : IYoutubeApiHandler
         } while (response.NextPageToken != null);
 
         return result;
+    }
+
+    public async Task<(bool IsValid, string Name, string? ErrorMessage)> GetPlaylistInfoAsync(string playlistId)
+    {
+        // Prepare request
+        Repeatable<string> part = new Repeatable<string>(new string[] { "id", "snippet", "status" });
+        var request = _youTubeService.Playlists.List(part);
+        request.Id = playlistId;
+
+        // Request playlist info
+        var response = await request.ExecuteAsync();
+        if (response.Items.Count == 0 || response.Items[0].Status.PrivacyStatus == "private")
+            return (false, "Unknown", "Invalid playlist id or private playlist");
+
+        // Extract name
+        string plName = response.Items[0].Snippet.Title;
+        string chName = response.Items[0].Snippet.ChannelTitle;
+        return (true, $"{chName} - {plName}", null);
     }
 
     /// <summary>
