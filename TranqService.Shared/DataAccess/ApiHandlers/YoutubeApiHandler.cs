@@ -54,7 +54,7 @@ public class YoutubeApiHandler : IYoutubeApiHandler
                 }));
         } while (response.NextPageToken != null);
 
-        return result;
+        return result.DistinctBy(x => x.VideoGuid).ToList();
     }
 
     public async Task<(bool IsValid, string Name, string? ErrorMessage)> GetPlaylistInfoAsync(string playlistId)
