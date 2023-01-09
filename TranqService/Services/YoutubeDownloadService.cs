@@ -123,22 +123,37 @@ public class YoutubeDownloadService : BackgroundService
         // Video playlists
         foreach (var plEntry in validPlaylists)
         {
-            string formatString = plEntry.OutputAs switch
+            try
             {
-                DownloadFormat.Audio => "mp3",
-                DownloadFormat.Video => "mp4",
-                _ => throw new ArgumentException("Impossible, download format error")
-            };
+                string formatString = plEntry.OutputAs switch
+                {
+                    DownloadFormat.Audio => "mp3",
+                    DownloadFormat.Video => "mp4",
+                    _ => throw new ArgumentException("Impossible, download format error")
+                };
 
-            // Populate queue with tasks
-            List<YoutubeVideoInfo> videosToDownload =
-                await _youtubeSaveHelper.GetUndownloadedVideosAsync(plEntry.PlaylistId);
+                // Populate queue with tasks
+                List<YoutubeVideoInfo> videosToDownload =
+                    await _youtubeSaveHelper.GetUndownloadedVideosAsync(plEntry.PlaylistId);
 
-            await ProcessPlaylistAsync(
-                videosToDownload,
-                PathHelper.GetProcessedWildcardDirectory(plEntry.OutputDirectory),
-                formatString,
-                stoppingToken);
+                // Process the playlist
+                await ProcessPlaylistAsync(
+                    videosToDownload,
+                    PathHelper.GetProcessedWildcardDirectory(plEntry.OutputDirectory),
+                    formatString,
+                    stoppingToken);
+
+                // Reset any error notifications if a problem was resoved
+                if (string.IsNullOrEmpty(plEntry.PlaylistError))
+                    await plEntry.SetPlaylistAsError(null);
+
+                throw new Exception("Test error");
+            }
+            catch (Exception ex)
+            {
+                _logger.Error("Skipping playlist due to error: " + ex.Message);
+                await plEntry.SetPlaylistAsError(ex.Message);
+            }
         }
     }
 

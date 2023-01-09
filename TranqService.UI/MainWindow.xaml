@@ -153,42 +153,41 @@
                                                     <!-- Playlist Description -->
                                                     <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,5" Text="Playlist Name" VerticalAlignment="Center" />
                                                     <StackPanel 
-                                            Grid.Row="0" Grid.Column="1" Margin="0,5" 
-                                            Orientation="Horizontal">
+                                                        Grid.Row="0" Grid.Column="1" Margin="0,5" 
+                                                        Orientation="Horizontal">
                                                         <TextBlock Text="YT" Margin="0,0,5,0"/>
                                                         <TextBlock Text="(Loading...)"/>
                                                     </StackPanel>
                                                     <!-- Playlist Id -->
                                                     <TextBlock 
-                                            Grid.Row="1" Grid.Column="0" Margin="0,5"
-                                            VerticalAlignment="Center" 
-                                            Text="Playlist Id" />
+                                                        Grid.Row="1" Grid.Column="0" Margin="0,5"
+                                                        VerticalAlignment="Center" 
+                                                        Text="Playlist Id" />
                                                     <TextBox 
-                                            Grid.Row="1" Grid.Column="1" Margin="0,5" 
-                                                 Text="{Binding PlaylistId}" IsReadOnly="True"/>
+                                                        Grid.Row="1" Grid.Column="1" Margin="0,5" 
+                                                        Text="{Binding PlaylistId}" IsReadOnly="True"/>
                                                     <!-- Output Directory -->
                                                     <TextBlock 
-                                                Grid.Row="2" Grid.Column="0" Margin="0,5" 
-                                                VerticalAlignment="Center" 
-                                                Text="Save Directory" />
+                                                        Grid.Row="2" Grid.Column="0" Margin="0,5" 
+                                                        VerticalAlignment="Center" 
+                                                        Text="Save Directory" />
                                                     <StackPanel 
-                                            Grid.Row="2" Grid.Column="1" Margin="0,5" 
-                                            Orientation="Vertical">
+                                                        Grid.Row="2" Grid.Column="1" Margin="0,5" 
+                                                        Orientation="Vertical">
                                                         <Grid>
                                                             <Grid.ColumnDefinitions>
                                                                 <ColumnDefinition Width="*"/>
                                                                 <ColumnDefinition Width="Auto"/>
                                                             </Grid.ColumnDefinitions>
                                                             <TextBox
-                                                        Grid.Column="0"
-                                                        Text="{Binding OutputDirectory}"/>
+                                                                Grid.Column="0"
+                                                                Text="{Binding OutputDirectory}"/>
                                                             <Button Grid.Column="1" Margin="10,0,0,0"
-                                                        Content="Change Directory"
-                                                        Tag="{Binding Path=DataContext, RelativeSource={RelativeSource Self}}"
-                                                        Click="SelectEditPlaylistDirectory_Click" />
+                                                                Content="Change Directory"
+                                                                Tag="{Binding Path=DataContext, RelativeSource={RelativeSource Self}}"
+                                                                Click="SelectEditPlaylistDirectory_Click" />
                                                         </Grid>
-                                                        <TextBlock FontSize="12" 
-                                                Text="Optional wildcards: {Year}">
+                                                        <TextBlock FontSize="12" Text="Optional wildcards: {Year}">
                                                             <TextBlock.ToolTip>
                                                                 <ToolTip>
                                                                     <TextBlock>
@@ -219,6 +218,17 @@
                                                             Tag="{Binding Path=DataContext, RelativeSource={RelativeSource Self}}"
                                                             Click="RemovePlaylist_Click"/>
                                                     </Grid>
+                                                    <!-- Error -->
+                                                    <TextBlock Visibility="{Binding HasError, Converter={StaticResource BoolToHiddenConverter}}"
+                                                        Grid.Row="4" Grid.Column="0" Margin="0,5"
+                                                        Foreground="Red"
+                                                        VerticalAlignment="Center" 
+                                                        Text="Error" />
+                                                    <TextBox Visibility="{Binding HasError, Converter={StaticResource BoolToHiddenConverter}}"
+                                                        BorderBrush="Red"
+                                                        Foreground="Red"
+                                                        Grid.Row="4" Grid.Column="1" Margin="0,5" 
+                                                        Text="{Binding PlaylistError}" IsReadOnly="True"/>
                                                 </Grid>
                                             </Border>
                                         </StackPanel>
@@ -431,7 +441,7 @@
             </Grid.ColumnDefinitions>
             <StackPanel Grid.Column="0" Orientation="Horizontal" Visibility="{Binding ShowStatusbar, Converter={StaticResource BoolToHiddenConverter}}">
                 <ProgressBar Margin="5,0,10,0" Height="20" Width="100" IsIndeterminate="True"/>
-                <TextBlock Text="aaa {Binding StatusbarText}aaa"/>
+                <TextBlock Text="{Binding StatusbarText}"/>
             </StackPanel>
             <TextBlock Margin="10,0" HorizontalAlignment="Right" Grid.Column="1" Foreground="White" Text="{Binding IsServiceRunningIndicator}"/>
         </Grid>

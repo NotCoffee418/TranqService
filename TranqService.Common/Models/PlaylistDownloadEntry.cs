@@ -48,6 +48,14 @@ public class PlaylistDownloadEntry : NotificationObject
     }
 
     /// <summary>
+    /// Indicates that this playlist had an error last attempt.
+    /// Define through SetPlaylistAsError().
+    /// </summary>
+    public string? PlaylistError { get; set; } = null;
+
+    public bool HasError { get => !string.IsNullOrEmpty(PlaylistError); }
+
+    /// <summary>
     /// Check if the config has any obvious errors. 
     /// Does not check validity of playlist Ids or path existence.
     /// </summary>
@@ -74,6 +82,29 @@ public class PlaylistDownloadEntry : NotificationObject
 
         // Valid, return success
         return (true, null);
+    }
+
+    /// <summary>
+    /// Marks a playlist as error if it's value is not null.
+    /// Will show in the UI if applicable.
+    /// Should be set to null again once error is resolved.
+    /// </summary>
+    /// <param name="error"></param>
+    /// <returns></returns>
+    public async Task SetPlaylistAsError(string error)
+    {
+        // Load current config and modify that
+        DownloadSources dls = await DownloadSources.GetAsync(forceReload: true);
+        for (int i = 0; i < dls.PlaylistDownloadEntries.Count; i++) // lazy search
+            if (dls.PlaylistDownloadEntries[i].PlaylistId == this.PlaylistId)
+            {
+                dls.PlaylistDownloadEntries[i].PlaylistError = error;
+                break;
+            }
+        await dls.SaveAsync();
+
+        // Also set own instance as error
+        this.PlaylistError = error;
     }
 
     /// <summary>
