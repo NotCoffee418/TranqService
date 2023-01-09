@@ -146,8 +146,6 @@ public class YoutubeDownloadService : BackgroundService
                 // Reset any error notifications if a problem was resoved
                 if (string.IsNullOrEmpty(plEntry.PlaylistError))
                     await plEntry.SetPlaylistAsError(null);
-
-                throw new Exception("Test error");
             }
             catch (Exception ex)
             {
