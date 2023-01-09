@@ -144,7 +144,7 @@ public class YoutubeDownloadService : BackgroundService
                     stoppingToken);
 
                 // Reset any error notifications if a problem was resoved
-                if (string.IsNullOrEmpty(plEntry.PlaylistError))
+                if (!string.IsNullOrEmpty(plEntry.PlaylistError))
                     await plEntry.SetPlaylistAsError(null);
             }
             catch (Exception ex)
