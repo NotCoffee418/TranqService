@@ -86,7 +86,7 @@ public class YoutubeDownloadService : BackgroundService
     private async Task ProcessAllPlaylists(CancellationToken stoppingToken)
     {        
         // Get all playlists to process
-        List<PlaylistDownloadEntry> validPlaylists = (await DownloadSources.GetAsync())
+        List<PlaylistDownloadEntry> validPlaylists = (await DownloadSources.GetAsync(forceReload: true))
             .PlaylistDownloadEntries
             .FindAll(x => x.Validate().IsValid);
 

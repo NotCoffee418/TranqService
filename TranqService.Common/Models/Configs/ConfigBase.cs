@@ -14,9 +14,9 @@ public abstract class ConfigBase<T>
     /// Gets (and creates) the instance of the config (async)
     /// </summary>
     /// <returns></returns>
-    public static async Task<T> GetAsync()
+    public static async Task<T> GetAsync(bool forceReload = false)
     {
-        if (instance is null)
+        if (forceReload || instance is null)
         {
             instance = new T();
             await (instance as ConfigBase<T>).ReloadInstanceAsync();
