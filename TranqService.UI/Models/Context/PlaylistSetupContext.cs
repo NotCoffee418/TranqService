@@ -44,6 +44,7 @@ public class PlaylistSetupContext : NotificationObject
         {
             // Load file first to ensure integrity of any other properties
             DownloadSources dlSrcs = task.Result;
+            dlSrcs.LastModifiedTimeUtc = DateTime.UtcNow;
             dlSrcs.PlaylistDownloadEntries = DownloadSourcesConfig.PlaylistDownloadEntries
                 .OrderByDescending(x => x.DateAdded)
                 .DistinctBy(x => new { x.PlaylistId, x.VideoPlatform, x.OutputAs})

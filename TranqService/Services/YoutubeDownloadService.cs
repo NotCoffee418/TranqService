@@ -25,6 +25,11 @@ public class YoutubeDownloadService : BackgroundService
         _ytdlp = ytdlp;
     }
 
+    /// <summary>
+    /// Prevents spamming YT api after playlists have been updated
+    /// </summary>
+    private DateTime LastDynamicAwaitEarlyBreakout { get; set; } = DateTime.UtcNow;
+
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         // Ensure only 1 instance is running        
@@ -36,7 +41,6 @@ public class YoutubeDownloadService : BackgroundService
 
         // Update yt-dlp once on startup
         await _ytdlpUpdater.TryUpdateYtdlpAsync();
-        
 
         // Start checking for new downloadable items
         while (!stoppingToken.IsCancellationRequested)
@@ -63,9 +67,35 @@ public class YoutubeDownloadService : BackgroundService
             await ProcessAllPlaylists(stoppingToken);
             _logger.Information("YoutubeDownloaderService: Download session complete.");
 
+            // Wait for next check, dynamic
+            await AwaitNextIteration(stoppingToken);
+        }
+    }
 
-            // Check 5 minutes
-            await Task.Delay(TimeSpan.FromMinutes(10), stoppingToken);
+    /// <summary>
+    /// Dynamic waits for next check
+    /// </summary>
+    /// <returns></returns>
+    private async Task AwaitNextIteration(CancellationToken stoppingToken)
+    {
+        DateTime startWaitTime = DateTime.UtcNow;
+        TimeSpan releaseAfter = InstallHelper.IsUiRunning() ? // check only once
+            TimeSpan.FromMinutes(1) : TimeSpan.FromMinutes(5);
+        DateTime defaultReleaseAt = startWaitTime.Add(releaseAfter);
+
+        // Wait in short chunks to respect early breakout, but also stoppingToken
+        while (!stoppingToken.IsCancellationRequested && defaultReleaseAt > DateTime.UtcNow)
+        {            
+            // Break out early if download playlists have been modified recently
+            DownloadSources dls = await DownloadSources.GetAsync(forceReload: true);
+            if (dls.LastModifiedTimeUtc > LastDynamicAwaitEarlyBreakout)
+            {
+                LastDynamicAwaitEarlyBreakout = DateTime.UtcNow;
+                break;
+            }
+
+            // Keep waiting 5 seconds until release time is reached
+            await Task.Delay(5000, stoppingToken);
         }
     }
 
