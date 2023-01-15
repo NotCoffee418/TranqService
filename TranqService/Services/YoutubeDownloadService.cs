@@ -85,7 +85,7 @@ public class YoutubeDownloadService : BackgroundService
     {
         DateTime startWaitTime = DateTime.UtcNow;
         TimeSpan releaseAfter = InstallHelper.IsUiRunning() ? // check only once
-            TimeSpan.FromMinutes(1) : TimeSpan.FromMinutes(5);
+            TimeSpan.FromMinutes(2) : TimeSpan.FromMinutes(7);
         DateTime defaultReleaseAt = startWaitTime.Add(releaseAfter);
 
         // Wait in short chunks to respect early breakout, but also stoppingToken
