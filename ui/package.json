@@ -10,6 +10,7 @@
     "tauri": "tauri"
   },
   "dependencies": {
+    "@fontsource/roboto": "^5.0.8",
     "next": "14.0.2",
     "react": "^18",
     "react-dom": "^18"
