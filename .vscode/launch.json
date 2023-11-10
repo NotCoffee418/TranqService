@@ -12,7 +12,7 @@
             // If you have changed target frameworks, make sure to update the program path.
             "program": "${workspaceFolder}/TranqService/bin/Debug/net6.0/TranqService.dll",
             "args": [],
-            "cwd": "${workspaceFolder}/TranqService",
+            "cwd": "${workspaceFolder}/Service/TranqService",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
             "console": "internalConsole",
             "stopAtEntry": false
@@ -21,6 +21,18 @@
             "name": ".NET Core Attach",
             "type": "coreclr",
             "request": "attach"
+        },
+        {
+            "name": "Run tauri dev",
+            "type": "node",
+            "request": "launch",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "run",
+                "tauri",
+                "dev"
+            ],
+            "cwd": "${workspaceFolder}/ui"
         }
     ]
 }
