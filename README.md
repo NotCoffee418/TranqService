@@ -1,6 +1,14 @@
 # TranqService
 Background service to watch YouTube playlists and download any videos added to them.
 
+## ⚠️ DEPRECATED ⚠️
+
+### This application is no longer maintained
+
+**This project has been deprecated in favor of [Video Archiver](https://github.com/NotCoffee418/videoarchiver).**
+
+Please migrate to the new application for continued support and updates.
+
 ## Installation
 ### Windows
 
